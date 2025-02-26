@@ -21,7 +21,7 @@ const LoadingScreen = () => {
         {/* Logo */}
         <div className="animate-bounce">
           <img
-            src="/src/assets/home/logo.png" // Replace with your logo path
+            src="../../../src/assets/home/logo1.png" // Replace with your logo path
             alt="LawLinkLK Logo"
             className="w-24 h-24 mx-auto mb-4"
           />
