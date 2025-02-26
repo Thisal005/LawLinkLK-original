@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, Moon, Sun, Home, Info, Settings, HelpCircle, Phone, LogIn, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
+import logo from "../../../assets/home/logo1.png"; // Logo image path
 
 const Navbar = ({ isLoading }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,8 +57,17 @@ const Navbar = ({ isLoading }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
-          <Link to="/" className="text-2xl font-bold text-primary dark:text-darkPrimary">
-            LawLinkLK
+          <Link to="/" className="flex items-center space-x-2">
+            <img src={logo} alt="LawLinkLK Logo" className="h-10 w-10" /> {/* Logo image */}
+            <span
+              className="text-2xl font-bold text-[#1a4b84] dark:text-[#5da9e9]"
+              style={{
+                WebkitTextStroke: "0.5px white", // White outline
+                textShadow: "0 0 5px white", // Optional: Adds a glow effect
+              }}
+            >
+              LawLinkLK
+            </span>
           </Link>
 
           {/* Desktop Menu */}

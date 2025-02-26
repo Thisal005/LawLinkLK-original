@@ -9,7 +9,7 @@ const About = () => {
           {/* Image */}
           <div className="rounded-lg overflow-hidden shadow-lg">
             <img
-              src="/src/assets/home/about.jpg"
+              src="../../../../src/assets/home/image.jpg"
               alt="About Us"
               className="w-full h-full object-cover"
             />

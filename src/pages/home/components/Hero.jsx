@@ -1,9 +1,21 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import homeImage from "../../../assets/home/home.jpg"; // Import the image
 
 const Hero = () => {
   return (
-    <section className="relative h-screen flex items-center justify-start bg-gradient-to-r from-[#1a4b84] to-[#5da9e9]">
+    <section
+      className="relative h-screen flex items-center justify-start"
+      style={{
+        backgroundImage: `url(${homeImage})`, // Use the imported image
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#1a4b84] to-[#5da9e9] opacity-75"></div>
+
       {/* Content */}
       <div className="relative text-left max-w-2xl px-8 text-white">
         <h1 className="text-6xl font-bold mb-6 animate-glow">
