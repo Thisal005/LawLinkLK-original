@@ -10,6 +10,7 @@ import Footer from "./components/Footer";
 import Chatbot from "./components/Chatbot";
 import Pricing from "./components/Pricing";
 import Testimonials from "./components/Testimonials";
+import HowItWorks from "./components/HowItWorks";
 
 const Home = () => {
   return (
@@ -19,6 +20,7 @@ const Home = () => {
       <About />
       <Features />
       <FAQ />
+      <HowItWorks />
       <Testimonials />
       <Pricing />
       <Contact />

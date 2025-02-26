@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Menu, X, Moon, Sun, Home, Info, Settings, HelpCircle, Phone, LogIn, UserPlus } from "lucide-react";
 import { Link } from "react-router-dom";
-import logo from "../../../assets/home/logo1.png"; // Logo image path
+import logo from "../../../assets/home/navimage.png"; // Logo image path
 
 const Navbar = ({ isLoading }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -58,16 +58,7 @@ const Navbar = ({ isLoading }) => {
         <div className="flex justify-between h-16 items-center">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src={logo} alt="LawLinkLK Logo" className="h-10 w-10" /> {/* Logo image */}
-            <span
-              className="text-2xl font-bold text-[#1a4b84] dark:text-[#5da9e9]"
-              style={{
-                WebkitTextStroke: "0.5px white", // White outline
-                textShadow: "0 0 5px white", // Optional: Adds a glow effect
-              }}
-            >
-              LawLinkLK
-            </span>
+            <img src={logo} alt="LawLinkLK Logo" className="h-10 w-50" /> {/* Logo image */}
           </Link>
 
           {/* Desktop Menu */}
@@ -78,9 +69,9 @@ const Navbar = ({ isLoading }) => {
             <button onClick={() => scrollToSection("features")} className="text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent transition duration-300">
               Features
             </button>
-            <Link to="/how-it-works" className="text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent transition duration-300">
+            <button onClick={() => scrollToSection("HowItWorks")} className="text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent transition duration-300">
               How It Works
-            </Link>
+            </button>
             <button onClick={() => scrollToSection("pricing")} className="text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent transition duration-300">
               Pricing
             </button>
@@ -153,13 +144,16 @@ const Navbar = ({ isLoading }) => {
                   <Settings size={20} />
                   <span>Features</span>
                 </button>
-                <Link
-                  to="/how-it-works"
+                <button
+                  onClick={() => {
+                    scrollToSection("HowItWorks");
+                    toggleMenu();
+                  }}
                   className="flex items-center space-x-3 text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent"
                 >
                   <Home size={20} />
                   <span>How It Works</span>
-                </Link>
+                </button>
                 <button
                   onClick={() => {
                     scrollToSection("pricing");

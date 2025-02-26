@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/home/Home";
-import HowItWorks from "./pages/HowItWorks/HowItWorks";
+import HowItWorks from "./pages/home/components/HowItWorks";
 import NotFound from "./pages/NotFound";
 import ClientLogin from "./pages/auth/ClientLogin";
 import LawyerLogin from "./pages/auth/LawyerLogin";
