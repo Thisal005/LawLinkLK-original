@@ -1,5 +1,6 @@
 import React from "react";
 import { Briefcase, Globe, Users } from "lucide-react";
+import aboutus from "../../../../src/assets/home/image.jpg"; // Image path
 
 const About = () => {
   return (
@@ -9,7 +10,7 @@ const About = () => {
           {/* Image */}
           <div className="rounded-lg overflow-hidden shadow-lg">
             <img
-              src="../../../../src/assets/home/image.jpg"
+              src={aboutus}
               alt="About Us"
               className="w-full h-full object-cover"
             />
