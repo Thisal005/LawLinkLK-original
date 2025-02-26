@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
+import loadinglogo from "../../../src/assets/home/logo1.png"; // Logo image path
 
 const LoadingScreen = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -21,7 +22,7 @@ const LoadingScreen = () => {
         {/* Logo */}
         <div className="animate-bounce">
           <img
-            src="../../../../src/assets/home/logo1.png" // Replace with your logo path
+            src={loadinglogo} // Replace with your logo path
             alt="LawLinkLK Logo"
             className="w-24 h-24 mx-auto mb-4"
           />
