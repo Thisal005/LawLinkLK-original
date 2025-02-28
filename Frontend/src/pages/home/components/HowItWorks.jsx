@@ -1,17 +1,17 @@
 import React from "react";
-import { User, Search, MessageSquare, Shield, Folder, Bell, Users, Scale } from "lucide-react";
+import { User, Search, MessageSquare, Shield, Folder, Bell, Hand, Scale } from "lucide-react";
 
 const HowItWorks = () => {
   const steps = [
     {
       icon: <User size={32} className="text-primary dark:text-darkPrimary" />,
       title: "Post Your Case",
-      description: "Clients can post their legal cases anonymously.",
+      description: "Clients can post their legal cases anonymously and securely.",
     },
     {
       icon: <Search size={32} className="text-primary dark:text-darkPrimary" />,
       title: "Find Relevant Cases",
-      description: "Lawyers can view cases matching their expertise and location.",
+      description: "Lawyers can view cases that match their expertise and location.",
     },
     {
       icon: <MessageSquare size={32} className="text-primary dark:text-darkPrimary" />,
@@ -19,7 +19,7 @@ const HowItWorks = () => {
       description: "Lawyers can send a message to clients to take on the case.",
     },
     {
-      icon: <Users size={32} className="text-primary dark:text-darkPrimary" />, // Alternative to Handshake
+      icon: <Hand size={32} className="text-primary dark:text-darkPrimary" />,
       title: "Mutual Agreement",
       description: "Both parties must agree to proceed. Profiles unlock after agreement.",
     },
@@ -46,7 +46,7 @@ const HowItWorks = () => {
   ];
 
   return (
-    <section id ="HowItWorks" className="py-16 bg-background dark:bg-darkBackground">
+    <section className="py-16 bg-background dark:bg-darkBackground">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 className="text-3xl font-bold text-center text-primary dark:text-darkPrimary mb-12">
           How LawLinkLK Works
