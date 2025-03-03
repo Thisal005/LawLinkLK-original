@@ -1,29 +1,25 @@
-// index.js
+// backend/index.js
+require("dotenv").config(); // Load environment variables
 const express = require("express");
 const cors = require("cors");
 const app = express();
 
-app.use(cors()); // Enable CORS
-app.use(express.json()); // Parse JSON bodies
+// Middleware
+app.use(cors());
+app.use(express.json());
 
-// Mock user database
-const users = [
-  { email: "test@example.com", password: "password" }
-];
+// In-memory data storage
+let users = [];
 
-// Login endpoint
-app.post("/api/login", (req, res) => {
-  const { email, password } = req.body;
+// Import auth routes
+const authRouter = require("./pages/auth/auth");
 
-  const user = users.find(
-    (u) => u.email === email && u.password === password
-  );
+// Use auth routes
+app.use("/api/auth", authRouter);
 
-  if (user) {
-    res.json({ message: "Login successful!", user });
-  } else {
-    res.status(401).json({ message: "Invalid credentials" });
-  }
+// Default route
+app.get("/", (req, res) => {
+  res.send("Welcome to LawLinkLK Backend!");
 });
 
 const PORT = process.env.PORT || 3000;

@@ -26,13 +26,13 @@ const Hero = () => {
         </p>
         <div className="space-x-4">
           <Link
-            to="/auth/client-login"
+            to="/create-account" // Correct path for client registration
             className="bg-white text-[#1a4b84] px-6 py-3 rounded-md hover:bg-[#5da9e9] hover:text-white transition duration-300"
           >
             Join as a Client
           </Link>
           <Link
-            to="/auth/lawyer-login"
+            to="/lawyer-create-account" // Correct path for lawyer registration
             className="bg-transparent border border-white text-white px-6 py-3 rounded-md hover:bg-white hover:text-[#1a4b84] transition duration-300"
           >
             Join as a Lawyer

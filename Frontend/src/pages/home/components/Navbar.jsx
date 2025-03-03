@@ -83,13 +83,13 @@ const Navbar = ({ isLoading }) => {
             </button>
             <div className="flex space-x-4">
               <Link
-                to="/auth/client-login"
+                to="/login" // Correct path for login
                 className="bg-primary text-white px-4 py-2 rounded-md hover:bg-accent hover:text-white transition duration-300"
               >
                 Login
               </Link>
               <Link
-                to="/auth/register"
+                to="/create-account" // Correct path for registration
                 className="bg-primary text-white px-4 py-2 rounded-md hover:bg-accent hover:text-white transition duration-300"
               >
                 Register
@@ -185,14 +185,14 @@ const Navbar = ({ isLoading }) => {
                   <span>Contact</span>
                 </button>
                 <Link
-                  to="/auth/client-login"
+                  to="/login" // Correct path for login
                   className="flex items-center space-x-3 text-textPrimary dark:text-darkTextPrimary hover:text-primary dark:hover:text-darkAccent"
                 >
                   <LogIn size={20} />
                   <span>Login</span>
                 </Link>
                 <Link
-                  to="/auth/register"
+                  to="/create-account" // Correct path for registration
                   className="flex items-center space-x-3 text-primary dark:text-darkAccent"
                 >
                   <UserPlus size={20} />

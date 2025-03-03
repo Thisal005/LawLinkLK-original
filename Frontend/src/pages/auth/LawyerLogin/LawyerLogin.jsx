@@ -1,55 +1,54 @@
-import React, { useState, useContext, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { toast } from "react-toastify";
+import React, { useState,useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import {  toast } from "react-toastify";
 import { AppContext } from "../../../context/AppContext";
 import axios from "axios";
 
-function Clientlogin() {
+
+
+function Lawyerlogin() {
+
   const navigate = useNavigate();
-  const location = useLocation();
-  const { backendUrl, setIsLoggedIn, getUserData, isLoggedIn } = useContext(AppContext);
+  const {backendUrl, setIsLoggedIn, getLawyerData} = useContext(AppContext);
   const [email, setEmailLocal] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  // Redirect if already logged in
-  useEffect(() => {
-    if (isLoggedIn) {
-      const redirectTo = location.state?.from || "/";
-      navigate(redirectTo, { replace: true });
-    }
-  }, [isLoggedIn, navigate, location]);
+ 
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
+    try { 
+      e.preventDefault();
+      axios.defaults.withCredentials = true;
+    
 
-    try {
-      const response = await axios.post(
-        `${backendUrl}/api/auth/login`,
-        { email, password },
-        { withCredentials: true }
-      );
+    const lawyerData =await axios.post(backendUrl + '/api/lawyer/login',
+      { email, password})
+    console.log("User Logged in", );
 
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-        await getUserData();
-        navigate("/", { replace: true });
-        toast.success("Logged in successfully!");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      toast.error(err.response?.data?.msg || "An error occurred during login. Please try again.");
-    } finally {
-      setIsLoading(false);
+    if (lawyerData.status === 200) {
+      setIsLoggedIn(true);
+    
+      setTimeout(() => {
+        getLawyerData();
+        navigate("/lawyer-dashboard");
+      }, 500);
+
+    }else{
+        toast.error(userData.data.msg);
+     
     }
+  }
+    catch(err){
+      console.log(err);
+    }
+    
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat p-5">
       <div className="flex flex-col md:flex-row max-w-[1000px] bg-white rounded-[12px] shadow-[0_4px_10px_rgba(0,0,0,0.1)] overflow-hidden md:animate-float">
-        {/* Animation Container */}
+        {/* Animation Container - Hidden on mobile */}
         <div className="hidden md:flex md:w-[60%] bg-gradient-to-br from-[#0022fc] to-[#001cd8] justify-center items-center overflow-hidden p-4">
           <video
             src="images/gtrfe-1.mp4"
@@ -59,8 +58,8 @@ function Clientlogin() {
             className="w-full h-auto rounded-[16px] shadow-[0_20px_40px_rgba(0,0,0,0.2)]"
           ></video>
         </div>
-
-        {/* Form Container */}
+  
+        {/* Form Container - Full width on mobile */}
         <div className="w-full md:w-[60%] p-6 md:p-8 flex flex-col justify-center items-center text-center">
           <h1 className="text-[24px] md:text-[28px] font-bold text-[#02189c] mb-4">
             Log in to your account
@@ -108,7 +107,7 @@ function Clientlogin() {
               <p className="text-[#3652fc] text-[14px] mt-2 text-right">
                 <a
                   href="#"
-                  onClick={() => navigate("/email-for-password-reset")}
+                  onClick={() => navigate("/lawyer-email-for-password-reset")}
                   className="hover:underline"
                 >
                   Forgot Password?
@@ -128,7 +127,7 @@ function Clientlogin() {
               Don't have an account?{" "}
               <a
                 href="#"
-                onClick={() => navigate("/create-account")}
+                onClick={() => navigate("/lawyer-create-account")}
                 className="text-[#3652fc] font-semibold hover:underline"
               >
                 Sign up now
@@ -141,4 +140,4 @@ function Clientlogin() {
   );
 }
 
-export default Clientlogin;
+export default Lawyerlogin;
