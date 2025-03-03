@@ -19,8 +19,8 @@ import Lawyerlogin from "./pages/auth/LawyerLogin/LawyerLogin";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
 import { AppContentProvider } from "./context/AppContext"; // Ensure this path is correct
-import { AuthContextProvider } from "./Context/AuthContext";
-import { SocketProvider } from "./Context/SocketContext";
+import { AuthContextProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
