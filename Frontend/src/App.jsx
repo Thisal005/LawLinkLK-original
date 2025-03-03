@@ -18,7 +18,6 @@ import LawyerVerifyEmail from "./pages/auth/LawyerLogin/Lawyer-verify-email";
 import Lawyerlogin from "./pages/auth/LawyerLogin/LawyerLogin";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
-import LawyerRestPasswordOtp from "./pages/auth/LawyerLogin/RequestResetPassOtp";
 import { AppContentProvider } from "./context/AppContext"; // Ensure this path is correct
 import { AuthContextProvider } from "./Context/AuthContext";
 import { SocketProvider } from "./Context/SocketContext";
@@ -59,7 +58,6 @@ const App = () => {
                   <Route path="/lawyer-login" element={<Lawyerlogin />} />
                   <Route path="/lawyer-email-for-password-reset" element={<LawyerEmailForResetPass />} />
                   <Route path="/lawyer-create-new-password" element={<LawyerNewpassword />} />
-                  <Route path="/lawyer-password-rest" element={<LawyerRestPasswordOtp />} />
 
                   {/* 404 Page */}
                   <Route path="*" element={<NotFound />} />
