@@ -5,7 +5,7 @@ import homeImage from "../../../assets/home/home.jpg"; // Import the image
 const Hero = () => {
   return (
     <section
-      className="relative h-screen flex items-center justify-start"
+      className="relative h-screen flex items-center justify-center overflow-hidden"
       style={{
         backgroundImage: `url(${homeImage})`, // Use the imported image
         backgroundSize: "cover",
@@ -13,32 +13,50 @@ const Hero = () => {
         backgroundRepeat: "no-repeat",
       }}
     >
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#1a4b84] to-[#5da9e9] opacity-75"></div>
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-[#042cc7]/70 via-[#0136fc]/70 to-[#008bff]/70"></div>
+
+      {/* Subtle Background Overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_70%)]"></div>
 
       {/* Content */}
-      <div className="relative text-left max-w-2xl px-8 text-white">
-        <h1 className="text-6xl font-bold mb-6 animate-glow">
-          Connecting You to the Right Legal Expertise!
-        </h1>
-        <p className="text-xl mb-8">
+      <div className="relative text-center max-w-2xl px-8 text-white z-10">
+      <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 
+
+  animate-[textReveal_1s_ease-out_forwards,fadeUp_1s_ease-out]
+  tracking-tight leading-tight">
+  Connecting You to the Right Legal Expertise!
+</h1>
+
+
+        {/* Subtext with Fade-In Animation */}
+        <p className="text-lg sm:text-xl text-gray-100 mb-8 opacity-90 animate-fade-in">
           Find all the legal help you need at your fingertips.
         </p>
-        <div className="space-x-4">
+
+        {/* Buttons with Staggered Fade-In Animation */}
+        <div className="flex flex-col sm:flex-row justify-center gap-6">
           <Link
-            to="/create-account" // Correct path for client registration
-            className="bg-white text-[#1a4b84] px-6 py-3 rounded-md hover:bg-[#5da9e9] hover:text-white transition duration-300"
+            to="/create-account"
+            className="bg-white/90 text-[#042cc7] px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white hover:text-[#0136fc] hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm animate-fade-in-delay-1"
           >
             Join as a Client
           </Link>
           <Link
-            to="/lawyer-create-account" // Correct path for lawyer registration
-            className="bg-transparent border border-white text-white px-6 py-3 rounded-md hover:bg-white hover:text-[#1a4b84] transition duration-300"
+            to="/lawyer-create-account"
+            className="bg-transparent border-2 border-white/90 text-white px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white/10 hover:border-white hover:text-white hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm animate-fade-in-delay-2"
           >
             Join as a Lawyer
           </Link>
         </div>
       </div>
+
+      {/* Floating Animation Elements */}
+      <div className="absolute top-20 left-20 w-16 h-16 bg-white/10 rounded-full backdrop-blur-sm animate-float-1"></div>
+      <div className="absolute bottom-20 right-20 w-20 h-20 bg-white/10 rounded-full backdrop-blur-sm animate-float-2"></div>
+      <div className="absolute top-1/3 left-1/4 w-12 h-12 bg-white/10 rounded-full backdrop-blur-sm animate-float-3"></div>
+      <div className="absolute top-1/4 left-3/4 w-12 h-12 bg-white/10 rounded-full backdrop-blur-sm animate-float-3"></div>
+
     </section>
   );
 };

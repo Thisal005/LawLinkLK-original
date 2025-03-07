@@ -4,66 +4,68 @@ import { User, Search, MessageSquare, Shield, Folder, Bell, Hand, Scale } from "
 const HowItWorks = () => {
   const steps = [
     {
-      icon: <User size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <User size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Post Your Case",
-      description: "Clients can post their legal cases anonymously and securely.",
+      description: "Clients share legal cases anonymously and securely.",
     },
     {
-      icon: <Search size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Search size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Find Relevant Cases",
-      description: "Lawyers can view cases that match their expertise and location.",
+      description: "Lawyers browse cases matching their skills and location.",
     },
     {
-      icon: <MessageSquare size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <MessageSquare size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Express Interest",
-      description: "Lawyers can send a message to clients to take on the case.",
+      description: "Lawyers message clients to offer their services.",
     },
     {
-      icon: <Hand size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Hand size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Mutual Agreement",
-      description: "Both parties must agree to proceed. Profiles unlock after agreement.",
+      description: "Profiles unlock once both agree to collaborate.",
     },
     {
-      icon: <Folder size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Folder size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Document Sharing",
-      description: "Securely share case-related documents after agreement.",
+      description: "Securely exchange case documents post-agreement.",
     },
     {
-      icon: <Bell size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Bell size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Case Updates",
-      description: "Lawyers update case progress, and clients get notified.",
+      description: "Clients stay informed with lawyer updates.",
     },
     {
-      icon: <Shield size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Shield size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Secure Communication",
-      description: "All communication and documents are kept private and secure.",
+      description: "All interactions remain private and encrypted.",
     },
     {
-      icon: <Scale size={32} className="text-primary dark:text-darkPrimary" />,
+      icon: <Scale size={28} className="text-blue-600 dark:text-blue-400" />,
       title: "Ethical & Ad-Free",
-      description: "No advertisements or unethical practices. We comply with all legal standards.",
+      description: "A clean, compliant platform with no ads.",
     },
   ];
 
   return (
-    <section className="py-16 bg-background dark:bg-darkBackground">
+    <section className="py-24 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center text-primary dark:text-darkPrimary mb-12">
+        <h2 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-400 bg-clip-text text-transparent mb-16">
           How LawLinkLK Works
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {steps.map((step, index) => (
             <div
               key={index}
-              className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="group bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg rounded-2xl shadow-md border border-gray-200/50 dark:border-gray-700/50 p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-2"
             >
               <div className="flex items-center justify-center mb-4">
-                {step.icon}
+                <div className="p-3 rounded-full bg-blue-100 dark:bg-blue-800 group-hover:bg-blue-200 dark:group-hover:bg-blue-700 transition-colors duration-200">
+                  {step.icon}
+                </div>
               </div>
-              <h3 className="text-xl font-semibold text-primary dark:text-darkPrimary mb-2">
+              <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400 group-hover:text-blue-700 dark:group-hover:text-blue-300 transition-colors duration-200 text-center">
                 {step.title}
               </h3>
-              <p className="text-textSecondary dark:text-darkTextSecondary">
+              <p className="text-gray-600 dark:text-gray-300 text-center mt-2">
                 {step.description}
               </p>
             </div>
