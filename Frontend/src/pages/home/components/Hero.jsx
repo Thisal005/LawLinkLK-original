@@ -14,7 +14,7 @@ const Hero = () => {
       }}
     >
       {/* Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#042cc7]/70 via-[#0136fc]/70 to-[#008bff]/70"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#042cc7]/70 via-[#0136fc]/70 to-[#008bff]/70 dark:from-blue-800 dark:via-blue-900 dark:to-blue-900"></div>
 
       {/* Subtle Background Overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_70%)]"></div>
@@ -35,16 +35,19 @@ const Hero = () => {
         </p>
 
         {/* Buttons with Staggered Fade-In Animation */}
-        <div className="flex flex-col sm:flex-row justify-center gap-6">
+        {/* Buttons */}
+        <div className="flex flex-col sm:flex-row justify-center gap-6 max-w-md mx-auto">
           <Link
             to="/create-account"
-            className="bg-white/90 text-[#042cc7] px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white hover:text-[#0136fc] hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm animate-fade-in-delay-1"
+            className="bg-white/95 text-[#042cc7] px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white hover:text-[#0136fc] hover:shadow-xl focus:ring-2 focus:ring-[#0136fc] focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 animate-[fadeUp_1.4s_ease-out] backdrop-blur-sm"
+            aria-label="Join as a Client"
           >
             Join as a Client
           </Link>
           <Link
             to="/lawyer-create-account"
-            className="bg-transparent border-2 border-white/90 text-white px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white/10 hover:border-white hover:text-white hover:shadow-xl transition-all duration-300 transform hover:scale-105 backdrop-blur-sm animate-fade-in-delay-2"
+            className="bg-transparent border-2 border-white/95 text-white px-8 py-3 rounded-full text-base font-medium shadow-lg hover:bg-white/20 hover:border-white focus:ring-2 focus:ring-white focus:ring-offset-2 transition-all duration-300 transform hover:scale-105 animate-[fadeUp_1.6s_ease-out] backdrop-blur-sm"
+            aria-label="Join as a Lawyer"
           >
             Join as a Lawyer
           </Link>
@@ -56,6 +59,8 @@ const Hero = () => {
       <div className="absolute bottom-20 right-20 w-20 h-20 bg-white/10 rounded-full backdrop-blur-sm animate-float-2"></div>
       <div className="absolute top-1/3 left-1/4 w-12 h-12 bg-white/10 rounded-full backdrop-blur-sm animate-float-3"></div>
       <div className="absolute top-1/4 left-3/4 w-12 h-12 bg-white/10 rounded-full backdrop-blur-sm animate-float-3"></div>
+      <div className="absolute bottom-20 right-180 w-8 h-8 bg-white/10 rounded-full backdrop-blur-sm animate-float-3"></div>
+
 
     </section>
   );
