@@ -23,7 +23,7 @@ const Chatbot = () => {
   return (
     <div className="fixed bottom-8 right-8 z-50">
       {isOpen ? (
-        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg w-[400px] h-[600px] flex flex-col overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 shadow-xl rounded-lg w-[400px] h-[500px] flex flex-col overflow-hidden">
           {/* Header */}
           <div className="flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
             <h3 className="text-lg font-semibold text-[#1a4b84] dark:text-[#5da9e9]">
