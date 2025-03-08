@@ -1,7 +1,7 @@
 import { io } from "socket.io-client";
 import { getCookie } from "./cookies";
 
-const socket = io("http://localhost:5000", {
+const socket = io("https://lawlinklk.onrender.com", {
   withCredentials: true,
   auth: {
     token: getCookie("jwt"), // Pass the JWT token for authentication
