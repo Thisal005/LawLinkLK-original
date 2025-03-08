@@ -11,6 +11,7 @@ import Chatbot from "./components/Chatbot";
 import Pricing from "./components/Pricing";
 import Testimonials from "./components/Testimonials";
 import HowItWorks from "./components/HowItWorks";
+import Security from "./components/Security";
 
 const Home = () => {
   return (
