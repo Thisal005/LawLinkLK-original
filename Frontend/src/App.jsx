@@ -9,6 +9,7 @@ import CookiePopup from "./components/CookiePopup";
 import LoadingScreen from "./pages/loading/LoadingScreen";
 import ClientCreateAcc from "./pages/auth/Registration/ClientCreateAcc";
 import Clientlogin from "../src/pages/auth/ClientLogin/ClientLogin";
+import ClientDashboard from "./pages/Client/ClientDashboard";
 import VerifyEmail from "./pages/auth/ClientLogin/Verify-email";
 import PasswordRest from "./pages/auth/ClientLogin/Password-Rest";
 import EmailForResetPass from "./pages/auth/ClientLogin/EmailForResetPass";
@@ -49,6 +50,7 @@ const App = () => {
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/create-account" element={<ClientCreateAcc />} />
                   <Route path="/login" element={<Clientlogin />} />
+                  <Route path="/ClientDashboard" element={<ClientDashboard />} />
                   <Route path="/verify-email" element={<VerifyEmail />} />
                   <Route path="/password-rest" element={<PasswordRest />} />
                   <Route path="/email-for-password-reset" element={<EmailForResetPass />} />

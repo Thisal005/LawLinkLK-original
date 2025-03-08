@@ -16,7 +16,7 @@ function Clientlogin() {
   // Redirect if already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      const redirectTo = location.state?.from || "/";
+      const redirectTo = location.state?.from || "/login";
       navigate(redirectTo, { replace: true });
     }
   }, [isLoggedIn, navigate, location]);
@@ -26,8 +26,7 @@ function Clientlogin() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        `${backendUrl}/api/auth/login`,
+      const response = await axios.post(`${backendUrl}/api/auth/login`,
         { email, password },
         { withCredentials: true }
       );
