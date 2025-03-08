@@ -103,3 +103,12 @@ body {
     blink-caret 0.75s step-end infinite;
 }
 
+/* Optional additional styling */
+.zapier-chatbot-container {
+  transition: all 0.3s ease-in-out;
+}
+
+zapier-interfaces-chatbot-embed {
+  border: none;
+  background: transparent;
+}
