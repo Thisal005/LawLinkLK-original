@@ -17,7 +17,7 @@ const LoadingScreen = () => {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-r from-[#1a4b84] to-[#5da9e9] z-50">
+    <div className="fixed inset-0 flex items-center justify-center bg-gradient-to-r from-[#042cc7] to-[#013] z-50">
       <div className="text-center animate-fadeIn">
         {/* Logo */}
         <div className="animate-bounce">

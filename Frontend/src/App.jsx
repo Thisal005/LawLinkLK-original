@@ -62,7 +62,6 @@ const App = () => {
                   {/* 404 Page */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
-                <CookiePopup />
                 <ToastContainer
                   position="top-right"
                   autoClose={3000}
