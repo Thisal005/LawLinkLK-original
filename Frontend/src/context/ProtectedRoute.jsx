@@ -1,20 +1,32 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { AppContext } from "../context/AppContext"; // Ensure this path is correct
+import { useAuthContext } from "../context/AuthContext"; // Use AuthContext
 
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn, userData, getUserData } = useContext(AppContext);
+  const { isLoggedIn, userData, getUserData } = useAuthContext();
   const location = useLocation();
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch user data if logged in but userData is missing
     if (isLoggedIn && !userData) {
-      getUserData();
+      console.log("ProtectedRoute: Fetching user data...");
+      getUserData()
+        .then(() => setIsLoading(false))
+        .catch((error) => {
+          console.error("Failed to fetch user data in ProtectedRoute:", error);
+          setIsLoading(false);
+        });
+    } else {
+      setIsLoading(false);
     }
   }, [isLoggedIn, userData, getUserData]);
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   if (!isLoggedIn) {
-    // Redirect to login page if not logged in
+    console.log("ProtectedRoute: Not logged in, redirecting to /login from", location.pathname);
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 

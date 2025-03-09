@@ -18,7 +18,7 @@ export const SocketProvider = ({ children }) => {
     useEffect(() => {
         if (user) {
             console.log("Connecting to WebSocket with userId:", user._id);
-            const newSocket = io('https://lawlinklk.onrender.com', { 
+            const newSocket = io('http://localhost:5000', { 
                 query: { 
                     userId: user._id,
                     name: user?.name || ''

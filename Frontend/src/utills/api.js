@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Create an axios instance with base URL
 const api = axios.create({
-  baseURL: 'https://lawlinklk.onrender.com',
+  baseURL: 'http://localhost:5000',
   withCredentials: true
 });
 
