@@ -2,6 +2,10 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AppContextProvider } from "./context/AppContext"; // Add this import
+import { AuthContextProvider } from "./context/AuthContext";
+import { SocketProvider } from "./context/SocketContext";
+import ProtectedRoute from "./context/ProtectedRoute";
 import Home from "./pages/home/Home";
 import HowItWorks from "./pages/home/components/HowItWorks";
 import NotFound from "./pages/NotFound";
@@ -19,9 +23,6 @@ import LawyerVerifyEmail from "./pages/auth/LawyerLogin/Lawyer-verify-email";
 import LawyerLogin from "./pages/auth/LawyerLogin/LawyerLogin";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
-import { AuthContextProvider } from "./context/AuthContext";
-import { SocketProvider } from "./context/SocketContext";
-import ProtectedRoute from "./context/ProtectedRoute";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -38,13 +39,14 @@ const App = () => {
     };
   }, []);
 
-  try {
-    return (
+  return (
+    <AppContextProvider> {/* Wrap everything with AppContextProvider */}
       <AuthContextProvider>
         <SocketProvider>
           <Router>
-            {isLoading && <LoadingScreen />}
-            {!isLoading && (
+            {isLoading ? (
+              <LoadingScreen />
+            ) : (
               <>
                 <Routes>
                   <Route path="/" element={<Home />} />
@@ -96,11 +98,8 @@ const App = () => {
           </Router>
         </SocketProvider>
       </AuthContextProvider>
-    );
-  } catch (error) {
-    console.error("App: Render error:", error);
-    return <div>Error loading app: {error.message}</div>;
-  }
+    </AppContextProvider>
+  );
 };
 
 export default App;

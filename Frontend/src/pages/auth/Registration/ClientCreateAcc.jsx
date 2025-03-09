@@ -11,8 +11,11 @@ import close from '../../../assets/Login_Cl_Lw/images/close.png';
 function ClientCreateAcc() {
   const navigate = useNavigate();
   const context = useContext(AppContext);
-  
-  // Fallback if context is undefined
+
+  // Log context for debugging
+  console.log('AppContext in ClientCreateAcc:', context);
+
+  // Fallback if context is undefined, ensuring setEmail is optional
   const { backendUrl = 'http://localhost:5000', setEmail } = context || {};
 
   const [formData, setFormData] = useState({
@@ -21,7 +24,7 @@ function ClientCreateAcc() {
     contact: '',
     password: '',
     confirmPassword: '',
-    document: null, // Unused in form/axios, consider removing if not needed
+    document: null, // Unused, consider removing if not needed
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -50,8 +53,6 @@ function ClientCreateAcc() {
     if (!formData.contact.trim()) newErrors.contact = 'Contact number is required.';
     if (!formData.password) newErrors.password = 'Password is required.';
     if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required.';
-    // Remove document validation if not used
-    // if (!formData.document) newErrors.document = 'Document is required';
 
     if (formData.password && calculatePasswordStrength(formData.password) < 5) {
       newErrors.password =
@@ -86,7 +87,12 @@ function ClientCreateAcc() {
       });
 
       if (response.status === 201) {
-        setEmail(formData.email); // Safe to call if context is provided
+        // Check if setEmail is a function before calling it
+        if (typeof setEmail === 'function') {
+          setEmail(formData.email);
+        } else {
+          console.warn('setEmail is not a function, skipping email set');
+        }
         toast.success('Account created successfully! Please check your email for the OTP.');
         navigate('/verify-email');
       } else {

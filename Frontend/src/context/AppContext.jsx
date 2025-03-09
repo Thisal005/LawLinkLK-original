@@ -1,16 +1,16 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useState } from 'react';
 
+// Create the context
 export const AppContext = createContext();
 
-export const useAppContext = () => useContext(AppContext);
+// Provider component
+export const AppContextProvider = ({ children }) => {
+  const [email, setEmail] = useState('');
+  const backendUrl = 'http://localhost:5000'; // Adjust if different
 
-export const AppContentProvider = ({ children }) => {
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
-
-  const value = {
-    backendUrl,
-    // Add other app-specific state here if needed
-  };
-
-  return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+  return (
+    <AppContext.Provider value={{ backendUrl, setEmail, email }}>
+      {children}
+    </AppContext.Provider>
+  );
 };
