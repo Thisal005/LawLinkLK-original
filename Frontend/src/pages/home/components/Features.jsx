@@ -147,7 +147,7 @@ const Features = () => {
             
             {/* Client Features */}
             <div className="space-y-6">
-              {clientFeatures.map((feature, index) => (
+              {lawyerFeatures.map((feature, index) => (
                 <div 
                   key={index}
                   ref={addToClientRefs}
@@ -176,7 +176,7 @@ const Features = () => {
           <div className="relative">
             {/* Lawyer Features (display first on mobile, but reversed order on desktop) */}
             <div className="space-y-6 order-2 md:mt-0 mb-8">
-              {lawyerFeatures.map((feature, index) => (
+              {clientFeatures.map((feature, index) => (
                 <div 
                   key={index}
                   ref={addToLawyerRefs}
