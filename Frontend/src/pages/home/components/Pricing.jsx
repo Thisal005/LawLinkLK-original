@@ -10,7 +10,7 @@ const Pricing = () => {
     },
     {
       name: "Premium",
-      price: "$49/month",
+      price: "$19/month",
       features: ["Unlimited Consultations", "Priority Support", "Advanced Search"],
     },
   ];
