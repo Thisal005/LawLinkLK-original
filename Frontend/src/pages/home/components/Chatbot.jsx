@@ -1,24 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MessageCircle, X } from "lucide-react";
-
-// Load Zapier web component script
-const loadZapierScript = () => {
-  const script = document.createElement("script");
-  script.src = "https://interfaces.zapier.com/assets/web-components/zapier-interfaces/zapier-interfaces.esm.js";
-  script.type = "module";
-  script.async = true;
-  document.body.appendChild(script);
-  return () => document.body.removeChild(script);
-};
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const chatbotId = "cm80dmx99001z1zfygess9gcb"; 
-
-  useEffect(() => {
-    const cleanup = loadZapierScript();
-    return cleanup;
-  }, []);
+  const chatbaseUrl = "https://www.chatbase.co/chatbot-iframe/b-n-flyXNakozp4Al6ODB";
 
   return (
     <div className="fixed bottom-8 right-8 z-50">
@@ -38,17 +23,16 @@ const Chatbot = () => {
             </button>
           </div>
 
-          {/* Zapier Chatbot Container */}
-          <div className="w-[400px] h-[600px] bg-white rounded-lg shadow-xl overflow-hidden">
-          <zapier-interfaces-chatbot-embed
-            is-popup="false"
-            chatbot-id="cm80dmx99001z1zfygess9gcb"
-            height="450px"
-            width="400px"
-          />
-        </div>
-
-         
+          {/* Chatbase Chatbot Container */}
+          <div className="flex-1">
+            <iframe
+              src={chatbaseUrl}
+              width="100%"
+              height="100%"
+              frameBorder="0"
+              title="Chatbase Chatbot"
+            />
+          </div>
         </div>
       ) : (
         <button
