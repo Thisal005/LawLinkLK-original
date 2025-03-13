@@ -1,32 +1,30 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuthContext } from "../context/AuthContext"; // Use AuthContext
+import { AppContext } from "./AppContext";
 
 const ProtectedRoute = ({ children }) => {
-  const { isLoggedIn, userData, getUserData } = useAuthContext();
+  const { isLoggedIn, userData, lawyerData, getUserData, getLawyerData, isCheckingAuth } =
+    useContext(AppContext);
   const location = useLocation();
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (isLoggedIn && !userData) {
-      console.log("ProtectedRoute: Fetching user data...");
-      getUserData()
-        .then(() => setIsLoading(false))
-        .catch((error) => {
-          console.error("Failed to fetch user data in ProtectedRoute:", error);
-          setIsLoading(false);
-        });
-    } else {
-      setIsLoading(false);
+    if (isLoggedIn && !userData && !lawyerData) {
+      // Try fetching user data if logged in but no data exists
+      if (location.pathname.includes("lawyer")) {
+        getLawyerData();
+      } else {
+        getUserData();
+      }
     }
-  }, [isLoggedIn, userData, getUserData]);
+  }, [isLoggedIn, userData, lawyerData, getUserData, getLawyerData, location.pathname]);
 
-  if (isLoading) {
+  if (isCheckingAuth) {
+    // Show a loading state while checking authentication
     return <div>Loading...</div>;
   }
 
   if (!isLoggedIn) {
-    console.log("ProtectedRoute: Not logged in, redirecting to /login from", location.pathname);
+    // Redirect to login page if not logged in
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
 

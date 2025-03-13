@@ -1,57 +1,76 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-import { useAuthContext } from "../../../context/AuthContext"; // Use AuthContext
+import { AppContext } from "../../../context/AppContext";
 import axios from "axios";
 
-function ClientLogin() {
+function Clientlogin() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { setIsLoggedIn, backendUrl, getUserData } = useAuthContext(); // Updated to AuthContext
+  const { backendUrl, setIsLoggedIn, getUserData, isLoggedIn } = useContext(AppContext);
   const [email, setEmailLocal] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  // If user is already logged in, redirect to home or the page they were trying to access
+  useEffect(() => {
+    if (isLoggedIn) {
+      const redirectTo = location.state?.from || "/login";
+      navigate(redirectTo, { replace: true });
+    }
+  }, [isLoggedIn, navigate, location]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-
+  
     try {
+      // Configure axios for credentials
       const config = {
         withCredentials: true,
         headers: {
-          "Content-Type": "application/json",
-        },
+          'Content-Type': 'application/json',
+        }
       };
-
+  
+      // Send login request to the backend
       const response = await axios.post(
-        `${backendUrl}/api/auth/login`,
+        `${backendUrl}/api/auth/login`, 
         { email, password },
         config
       );
-
+  
+      // Check if the login was successful
       if (response.status === 200) {
         console.log("User logged in successfully:", response.data);
-
+  
+        // Check if cookies were set
         setTimeout(() => {
-          console.log("Cookies after login:", document.cookie || "No cookies visible");
-        }, 500);
-
-        setIsLoggedIn(true); // Updates AuthContext's isLoggedIn
+          console.log("Cookies after login:", document.cookie);
+        }, 100);
+  
+        // Update the login state
+        setIsLoggedIn(true);
+  
+        // Fetch user data
         await getUserData();
-
-        const redirectTo = location.state?.from || "/client-dashboard"; // Matches App.jsx route
-        console.log("ClientLogin: Navigating to:", redirectTo);
-        navigate(redirectTo, { replace: true });
-
+        
+        // Redirect to home
+        navigate("/client-dashboard", { replace: true });
+  
+        // Show success message
         toast.success("Logged in successfully!");
       }
     } catch (err) {
       console.error("Login error:", err);
-      const errorMsg =
-        err.response?.data?.msg || "An error occurred during login. Please try again.";
-      toast.error(errorMsg);
+  
+      // Handle specific error messages from the backend
+      if (err.response && err.response.data && err.response.data.msg) {
+        toast.error(err.response.data.msg);
+      } else {
+        toast.error("An error occurred during login. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -60,6 +79,7 @@ function ClientLogin() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-cover bg-center bg-no-repeat p-5">
       <div className="flex flex-col md:flex-row max-w-[1000px] bg-white rounded-[12px] shadow-[0_4px_10px_rgba(0,0,0,0.1)] overflow-hidden md:animate-float">
+        {/* Animation Container - Hidden on mobile */}
         <div className="hidden md:flex md:w-[60%] bg-gradient-to-br from-[#0022fc] to-[#001cd8] justify-center items-center overflow-hidden p-4">
           <video
             src="images/gtrfe-1.mp4"
@@ -70,7 +90,8 @@ function ClientLogin() {
           ></video>
           <div className="absolute inset-0 bg-[#0022fc]/10 opacity-0 group-hover:opacity-100 rounded-[16px] transition-opacity duration-300 pointer-events-none"></div>
         </div>
-
+  
+        {/* Form Container - Full width on mobile */}
         <div className="w-full md:w-[60%] p-6 md:p-8 flex flex-col justify-center items-center text-center">
           <h1 className="text-[24px] md:text-[28px] font-bold text-[#02189c] mb-4">
             Log in to your account
@@ -135,7 +156,7 @@ function ClientLogin() {
           </form>
           <div className="mt-6">
             <p className="text-[14px] text-gray-600">
-              Don’t have an account?{" "}
+              Don't have an account?{" "}
               <a
                 href="#"
                 onClick={() => navigate("/create-account")}
@@ -151,4 +172,4 @@ function ClientLogin() {
   );
 }
 
-export default ClientLogin;
+export default Clientlogin;

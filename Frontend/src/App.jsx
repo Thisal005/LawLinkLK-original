@@ -2,18 +2,17 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AppContextProvider } from "./context/AppContext"; // Add this import
+import { AppContentProvider } from "./context/AppContext";
 import { AuthContextProvider } from "./context/AuthContext";
 import { SocketProvider } from "./context/SocketContext";
 import ProtectedRoute from "./context/ProtectedRoute";
 import Home from "./pages/home/Home";
 import HowItWorks from "./pages/home/components/HowItWorks";
 import NotFound from "./pages/NotFound";
-import CookiePopup from "./components/CookiePopup";
 import LoadingScreen from "./pages/loading/LoadingScreen";
 import ClientCreateAcc from "./pages/auth/Registration/ClientCreateAcc";
 import ClientLogin from "./pages/auth/ClientLogin/ClientLogin";
-import ClientDashboard from "./pages/Client/ClientDashboard";
+import ClientDashboard from "./pages/Dashboard/Client/ClientDashboard";
 import VerifyEmail from "./pages/auth/ClientLogin/Verify-email";
 import PasswordRest from "./pages/auth/ClientLogin/Password-Rest";
 import EmailForResetPass from "./pages/auth/ClientLogin/EmailForResetPass";
@@ -23,6 +22,7 @@ import LawyerVerifyEmail from "./pages/auth/LawyerLogin/Lawyer-verify-email";
 import LawyerLogin from "./pages/auth/LawyerLogin/LawyerLogin";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
+import axios from "axios";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +40,7 @@ const App = () => {
   }, []);
 
   return (
-    <AppContextProvider> {/* Wrap everything with AppContextProvider */}
+    <AppContentProvider>
       <AuthContextProvider>
         <SocketProvider>
           <Router>
@@ -79,6 +79,7 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
+                  <Route path="/ask-lexi" element={<div>Ask Lexi Page</div>} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <ToastContainer
@@ -92,13 +93,12 @@ const App = () => {
                   draggable
                   pauseOnHover
                 />
-                <CookiePopup />
               </>
             )}
           </Router>
         </SocketProvider>
       </AuthContextProvider>
-    </AppContextProvider>
+    </AppContentProvider>
   );
 };
 
