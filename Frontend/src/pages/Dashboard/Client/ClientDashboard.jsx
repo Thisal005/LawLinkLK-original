@@ -2,12 +2,12 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AppContext } from "../../../context/AppContext";
 import { useNavigate } from "react-router-dom";
-import Header from "../Header";
+import Header from "./Components/Header";
 import Sidebar from "./Components/Sidebar";
 import axios from "axios";
 import { toast } from "react-toastify";
 import CaseCard from "./Components/CaseCard";
-import TaskList from "./Components/TaskList";
+import TaskList from "../TaskList";
 import NoteList from "./Components/NoteList";
 import lawyer2 from "../../../assets/Login_Cl_Lw/images/lawyer2.mp4"
 

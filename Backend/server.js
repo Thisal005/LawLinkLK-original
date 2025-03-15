@@ -1,3 +1,4 @@
+// server.js
 import express from "express";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
@@ -20,8 +21,16 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
+
+// Log incoming requests for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("Headers:", req.headers);
+  next();
+});
 
 const allowedOrigins = ["http://localhost:5173"];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
@@ -29,6 +38,7 @@ app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use("/uploads", express.static("uploads"));
 app.use("/uploads-chat", express.static("uploads-chat"));
 
+// Routes
 app.use("/api/auth", authRoute);
 app.use("/api/messages", messageRoute);
 app.use("/api/user", userRouter);
@@ -40,9 +50,11 @@ app.use("/api/notifications", notificationRouter);
 app.use("/api/notes", noteRouter);
 app.use("/api/todos", todoRouter);
 
+// Error handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.stack);
+  console.error("Server error:", err.stack);
   res.status(500).json({
+    success: false,
     error: "Internal Server Error",
     message: process.env.NODE_ENV === "development" ? err.message : undefined,
   });

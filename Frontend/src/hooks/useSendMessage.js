@@ -2,7 +2,7 @@ import { useState, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import useConversation from "../zustand/useConversation";
-import { AppContext } from "../Context/AppContext";
+import { AppContext } from "../context/AppContext";
 import sodium from "libsodium-wrappers";
 
 const useSendMessage = () => {

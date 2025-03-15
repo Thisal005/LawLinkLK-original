@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
-import useFetchTasks from "../../../../hooks/useFetchTask";
-import TaskCard from "../Components/Tasks";
+import useFetchTasks from "../../hooks/useFetchTask";
+import TaskCard from "./Client/Components/Tasks";
 
 const TaskList = ({ caseId }) => {
   const { tasks, loading, fetchTasks } = useFetchTasks(caseId);

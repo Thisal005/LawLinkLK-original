@@ -20,8 +20,11 @@ import Newpassword from "./pages/auth/ClientLogin/Newpassword";
 import LawyerCreateAcc from "./pages/auth/Registration/LawyerCreateAcc";
 import LawyerVerifyEmail from "./pages/auth/LawyerLogin/Lawyer-verify-email";
 import LawyerLogin from "./pages/auth/LawyerLogin/LawyerLogin";
+import Notifications from "./pages/Dashboard/Notifications"
+import PostCase from "./pages/Dashboard/Client/Components/CreatePostForm";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
+import Chat from "./pages/Dashboard/Chat";
 import axios from "axios";
 
 const App = () => {
@@ -59,6 +62,7 @@ const App = () => {
                     path="/email-for-password-reset"
                     element={<EmailForResetPass />}
                   />
+                  <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
                   <Route path="/create-new-password" element={<Newpassword />} />
                   <Route path="/lawyer-create-account" element={<LawyerCreateAcc />} />
                   <Route path="/lawyer-verify-email" element={<LawyerVerifyEmail />} />
@@ -67,6 +71,8 @@ const App = () => {
                     path="/lawyer-email-for-password-reset"
                     element={<LawyerEmailForResetPass />}
                   />
+                  <Route path="/chat" element={<ProtectedRoute><Chat/></ProtectedRoute>} />
+                  <Route path="/post-case" element={<ProtectedRoute><PostCase/></ProtectedRoute>} />
                   <Route
                     path="/lawyer-create-new-password"
                     element={<LawyerNewpassword />}

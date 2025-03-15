@@ -2,10 +2,16 @@
 import mongoose from "mongoose";
 
 const notificationSchema = new mongoose.Schema({
-  recipientId: {
+  userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Lawyer",
     required: true,
+    index: true,
+    refPath: "userType",
+  },
+  userType: {
+    type: String,
+    required: true,
+    enum: ["User", "Lawyer"],
   },
   message: {
     type: String,
@@ -14,10 +20,11 @@ const notificationSchema = new mongoose.Schema({
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Task",
+    required: false,
   },
-  isRead: {
+  unread: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   createdAt: {
     type: Date,

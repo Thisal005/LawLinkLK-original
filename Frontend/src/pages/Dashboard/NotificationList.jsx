@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useContext } from "react";
-import { AppContext } from "../Context/AppContext";
+import { AppContext } from "../../context/AppContext";
 
 const NotificationList = () => {
   const [notifications, setNotifications] = useState([]);

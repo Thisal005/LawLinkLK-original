@@ -49,7 +49,7 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { path: "/lawyer-dashboard", label: "Dashboard", icon: Grid },
+    { path: "/client-dashboard", label: "Dashboard", icon: Grid },
     { path: "/post-case", label: "Post Case", icon: FileText },
     { path: "/chatbot", label: "Chatbot", icon: MessageSquare },
   ];
@@ -68,7 +68,7 @@ const Sidebar = () => {
             <div className="text-xl sm:text-2xl font-bold tracking-tight">
               <img
                 onClick={() => {
-                  navigate("/lawyer-dashboard");
+                  navigate("/client-dashboard");
                   setIsSidebarOpen(false); // Close sidebar on mobile after click
                 }}
                 style={{ cursor: 'pointer' }}
