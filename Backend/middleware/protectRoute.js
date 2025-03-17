@@ -1,7 +1,7 @@
 // middleware/protectRoute.js
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
-import Lawyer from "../models/lawyer.model.js"; // Changed from Lawyers
+import Lawyer from "../models/lawyer.model.js";
 import mongoose from "mongoose";
 
 const protectRoute = async (req, res, next) => {
