@@ -12,7 +12,9 @@ export const AppContentProvider = (props) => {
   const [lawyerData, setLawyerData] = useState(null);
   const [email, setEmail] = useState("");
   const [privateKey, setPrivateKey] = useState(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // New loading state
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // Added state for notifications
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     const checkLoginStatus = async () => {
@@ -21,7 +23,7 @@ export const AppContentProvider = (props) => {
         // Check user login
         try {
           const { data } = await axios.get(`${backendUrl}/api/user/data`, { withCredentials: true });
-          console.log("User data response:", data); // Debug log
+          console.log("User data response:", data);
           if (data.success) {
             setIsLoggedIn(true);
             setUserData(data.userData);
@@ -35,7 +37,7 @@ export const AppContentProvider = (props) => {
         // Check lawyer login
         try {
           const { data } = await axios.get(`${backendUrl}/api/lawyer-data/data`, { withCredentials: true });
-          console.log("Lawyer data response:", data); // Debug log
+          console.log("Lawyer data response:", data);
           if (data.success) {
             setIsLoggedIn(true);
             setLawyerData(data.UserData);
@@ -64,7 +66,7 @@ export const AppContentProvider = (props) => {
         withCredentials: true,
         headers: { Authorization: `Bearer ${getCookie("jwt")}` },
       });
-      console.log("Fetched user data:", data); // Debug log
+      console.log("Fetched user data:", data);
       if (data.success) {
         setUserData(data.userData);
         setPrivateKey(data.userData.privateKey);
@@ -82,7 +84,7 @@ export const AppContentProvider = (props) => {
   const getLawyerData = async () => {
     try {
       const { data } = await axios.get(`${backendUrl}/api/lawyer-data/data`, { withCredentials: true });
-      console.log("Fetched lawyer data:", data); // Debug log
+      console.log("Fetched lawyer data:", data);
       if (data.success) {
         setLawyerData(data.UserData);
         setPrivateKey(data.UserData.privateKey);
@@ -102,7 +104,7 @@ export const AppContentProvider = (props) => {
     try {
       const endpoint = isLawyer ? `/api/lawyer-data/${userId}` : `/api/user/${userId}`;
       const { data } = await axios.get(`${backendUrl}${endpoint}`, { withCredentials: true });
-      console.log(`Public key response for ${userId}:`, data); // Debug log
+      console.log(`Public key response for ${userId}:`, data);
       if (data.success && data.data.publicKey) {
         return data.data.publicKey;
       }
@@ -112,6 +114,17 @@ export const AppContentProvider = (props) => {
       toast.error(`Failed to fetch public key for ${isLawyer ? "lawyer" : "user"} ${userId}`);
       return null;
     }
+  };
+
+  // Added function to add notifications globally
+  const addNotification = (message) => {
+    const newNotification = {
+      _id: Date.now().toString(),
+      message,
+      unread: true,
+      createdAt: new Date().toISOString(),
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
   };
 
   const value = {
@@ -128,7 +141,9 @@ export const AppContentProvider = (props) => {
     setEmail,
     privateKey,
     getPublicKey,
-    isCheckingAuth, // Expose loading state
+    isCheckingAuth,
+    notifications, // Added to context
+    addNotification, // Added to context
   };
 
   return <AppContext.Provider value={value}>{props.children}</AppContext.Provider>;

@@ -25,6 +25,7 @@ import PostCase from "./pages/Dashboard/Client/Components/CreatePostForm";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
 import Chat from "./pages/Dashboard/Chat";
+import Chatbot from "./pages/Dashboard/Client/Components/Chatbot";
 import axios from "axios";
 
 const App = () => {
@@ -64,6 +65,7 @@ const App = () => {
                   />
                   <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
                   <Route path="/create-new-password" element={<Newpassword />} />
+                  <Route path="/chatbot" element={<Chatbot />} />
                   <Route path="/lawyer-create-account" element={<LawyerCreateAcc />} />
                   <Route path="/lawyer-verify-email" element={<LawyerVerifyEmail />} />
                   <Route path="/lawyer-login" element={<LawyerLogin />} />

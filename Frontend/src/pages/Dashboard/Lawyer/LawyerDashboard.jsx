@@ -3,11 +3,7 @@ import { AppContext } from "../Context/AppContext";
 import { useNavigate } from 'react-router-dom';
 import Sidebar from "../Client/Components/Sidebar";
 import Header from "../Header";
-import axios from "axios";
-import { toast } from "react-toastify";
-import Calender from "./Components/Calender";
 import BasicLineChart from "./Components/Linechart";
-import BasicTimeClock from "../Client/Components/Clock";
 
 /**
  * Home component - the main dashboard for lawyers.

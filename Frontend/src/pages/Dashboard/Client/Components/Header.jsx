@@ -1,9 +1,10 @@
-import React, { useState, useContext, useRef, useEffect } from 'react';
-import { Calendar, HelpCircle, Bell, User, Settings, LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import { toast } from 'react-toastify';
-import { AppContext } from '../../../../context/AppContext';
+// Header.jsx
+import React, { useState, useContext, useRef, useEffect } from "react";
+import { Calendar, HelpCircle, Bell, User, Settings, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../../../../context/AppContext";
 
 const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" }) => {
   const [notificationsVisible, setNotificationsVisible] = useState(false);
@@ -17,35 +18,54 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
 
   const currentUser = userData || lawyerData;
   const displayName = propDisplayName || currentUser?.fullName || "Guest";
-  const unreadNotifications = notifications.filter(n => n.unread).length;
+  const unreadNotifications = notifications.filter((n) => n.unread).length;
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (!currentUser?._id) {
+      // Strengthened ID validation
+      if (
+        !currentUser?._id ||
+        typeof currentUser._id !== "string" ||
+        !/^[0-9a-fA-F]{24}$/.test(currentUser._id) // MongoDB ObjectId format
+      ) {
+        console.warn("Skipping notifications fetch: Invalid or missing user ID", {
+          userData,
+          lawyerData,
+        });
         setNotifications([]);
         return;
       }
 
       setLoadingNotifications(true);
       try {
-        const endpoint = lawyerData 
+        const endpoint = lawyerData
           ? `${backendUrl}/api/case/lawyer/notifications`
           : `${backendUrl}/api/case/user/notifications`;
+        console.log("Fetching notifications from:", endpoint, "with user ID:", currentUser._id);
         const response = await axios.get(endpoint, { withCredentials: true });
+        console.log("Notifications response:", response.data);
         if (response.data.success) {
           setNotifications(response.data.data || []);
         } else {
           setNotifications([]);
+          console.warn("Notifications fetch succeeded but no data:", response.data);
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error("Error fetching notifications:", error.response?.data || error.message);
         setNotifications([]);
       } finally {
         setLoadingNotifications(false);
       }
     };
 
-    fetchNotifications();
+    // Only start polling if user is authenticated
+    if (currentUser?._id) {
+      fetchNotifications();
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    } else {
+      console.log("User not authenticated yet, skipping notifications fetch");
+    }
   }, [currentUser, backendUrl, lawyerData]);
 
   useEffect(() => {
@@ -58,47 +78,56 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const toggleNotifications = () => {
-    setNotificationsVisible(prev => !prev);
+    setNotificationsVisible((prev) => !prev);
     if (userMenuVisible) setUserMenuVisible(false);
   };
 
   const toggleUserMenu = () => {
-    setUserMenuVisible(prev => !prev);
+    setUserMenuVisible((prev) => !prev);
     if (notificationsVisible) setNotificationsVisible(false);
   };
 
   const handleLogout = async () => {
     try {
-      const endpoint = lawyerData 
+      const endpoint = lawyerData
         ? `${backendUrl}/api/lawyer/logout`
         : `${backendUrl}/api/auth/logout`;
       await axios.post(endpoint, {}, { withCredentials: true });
       setIsLoggedIn(false);
       setUserData(null);
-      navigate(lawyerData ? '/lawyer-login' : '/login');
-      toast.success('Logged out successfully');
+      navigate(lawyerData ? "/lawyer-login" : "/login");
+      toast.success("Logged out successfully");
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error(error.response?.data?.msg || 'Logout failed. Please try again.');
+      console.error("Logout error:", error);
+      toast.error(error.response?.data?.msg || "Logout failed. Please try again.");
     }
   };
 
   const markAllAsRead = async () => {
     try {
-      const endpoint = lawyerData 
+      const endpoint = lawyerData
         ? `${backendUrl}/api/case/lawyer/notifications/mark-all-read`
         : `${backendUrl}/api/case/user/notifications/mark-all-read`;
       await axios.post(endpoint, {}, { withCredentials: true });
-      setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
     } catch (error) {
-      console.error('Error marking notifications as read:', error);
-      // No toast here; silently ignore
+      console.error("Error marking notifications as read:", error);
     }
+  };
+
+  const addNotification = (message) => {
+    const newNotification = {
+      _id: Date.now().toString(),
+      message,
+      unread: true,
+      createdAt: new Date().toISOString(),
+    };
+    setNotifications((prev) => [newNotification, ...prev]);
   };
 
   return (
@@ -108,20 +137,31 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
           Legal Dashboard
         </h1>
       </div>
-
       <div className="flex items-center gap-3 sm:gap-6">
         <div className="flex items-center gap-2 sm:gap-4">
-          <button className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group" aria-label="Calendar" onClick={() => navigate('/calendar')}>
+          <button
+            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
+            aria-label="Calendar"
+            onClick={() => navigate("/calendar")}
+          >
             <Calendar className="w-5 h-5 text-white" />
-            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">Calendar</span>
+            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              Calendar
+            </span>
           </button>
-          <button className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group" aria-label="Help" onClick={() => navigate('/help')}>
+          <button
+            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
+            aria-label="Help"
+            onClick={() => navigate("/help")}
+          >
             <HelpCircle className="w-5 h-5 text-white" />
-            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">Help</span>
+            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              Help
+            </span>
           </button>
           <div className="relative" ref={notificationRef}>
-            <button 
-              className={`p-2 ${notificationsVisible ? 'bg-blue-600' : 'hover:bg-blue-600'} rounded-full transition-colors duration-200 relative group`}
+            <button
+              className={`p-2 ${notificationsVisible ? "bg-blue-600" : "hover:bg-blue-600"} rounded-full transition-colors duration-200 relative group`}
               onClick={toggleNotifications}
               aria-label={`Notifications - ${unreadNotifications} unread`}
               aria-expanded={notificationsVisible}
@@ -132,33 +172,44 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
                   {unreadNotifications}
                 </span>
               )}
-              <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">Notifications</span>
+              <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                Notifications
+              </span>
             </button>
             {notificationsVisible && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-hidden border border-gray-200">
                 <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
                   <h3 className="text-lg font-semibold text-blue-700">Notifications</h3>
-                  <button className="text-sm text-blue-600 hover:text-blue-800 font-medium" onClick={markAllAsRead}>Mark all as read</button>
+                  <button
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={markAllAsRead}
+                  >
+                    Mark all as read
+                  </button>
                 </div>
                 <div className="max-h-72 overflow-y-auto">
                   {loadingNotifications ? (
                     <div className="p-4 text-center text-gray-500">Loading...</div>
                   ) : notifications.length > 0 ? (
-                    notifications.map(notification => (
-                      <div 
-                        key={notification.id} 
-                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${notification.unread ? 'bg-blue-50' : ''}`}
-                        onClick={() => console.log('Notification clicked:', notification)}
+                    notifications.map((notification) => (
+                      <div
+                        key={notification._id}
+                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${notification.unread ? "bg-blue-50" : ""}`}
+                        onClick={() => console.log("Notification clicked:", notification)}
                       >
                         <div className="flex justify-between items-start">
-                          <p className={`text-sm text-gray-800 ${notification.unread ? 'font-semibold' : ''}`}>
+                          <p
+                            className={`text-sm text-gray-800 ${notification.unread ? "font-semibold" : ""}`}
+                          >
                             {notification.message}
                           </p>
                           {notification.unread && (
                             <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1"></span>
                           )}
                         </div>
-                        <p className="text-xs text-gray-500 mt-1">{notification.date || notification.createdAt}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {new Date(notification.createdAt).toLocaleString()}
+                        </p>
                       </div>
                     ))
                   ) : (
@@ -166,7 +217,10 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
                   )}
                 </div>
                 <div className="p-3 text-center bg-gray-50 border-t border-gray-100">
-                  <button className="text-sm text-blue-600 hover:text-blue-800 font-medium" onClick={() => navigate('/notifications')}>
+                  <button
+                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    onClick={() => navigate("/notifications")}
+                  >
                     View all notifications
                   </button>
                 </div>
@@ -175,37 +229,59 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
           </div>
         </div>
         <div className="relative pl-3 border-l border-blue-400" ref={userMenuRef}>
-          <button className="flex items-center gap-2 sm:gap-3 hover:bg-blue-600 rounded-full py-1 px-2 transition-colors duration-200" onClick={toggleUserMenu} aria-expanded={userMenuVisible} aria-label="User menu">
+          <button
+            className="flex items-center gap-2 sm:gap-3 hover:bg-blue-600 rounded-full py-1 px-2 transition-colors duration-200"
+            onClick={toggleUserMenu}
+            aria-expanded={userMenuVisible}
+            aria-label="User menu"
+          >
             <div className="text-right hidden sm:block">
               <div className="font-medium text-white text-sm">{displayName}</div>
               <div className="text-xs text-blue-200">{practiceAreas}</div>
             </div>
             <div className="relative">
-              <img src="./images/profilepic.jpg" alt={`${displayName}'s profile`} className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-200" />
+              <img
+                src="./images/profilepic.jpg"
+                alt={`${displayName}'s profile`}
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-200"
+              />
               <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
             </div>
           </button>
           {userMenuVisible && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200">
               <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-blue-50">
-                <img src="./images/profilepic.jpg" alt={`${displayName}'s profile`} className="w-12 h-12 rounded-full object-cover" />
+                <img
+                  src="./images/profilepic.jpg"
+                  alt={`${displayName}'s profile`}
+                  className="w-12 h-12 rounded-full object-cover"
+                />
                 <div>
                   <p className="font-semibold text-blue-700">{displayName}</p>
                   <p className="text-xs text-gray-600">{practiceAreas}</p>
                 </div>
               </div>
               <div className="py-1">
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors" onClick={() => navigate('/profile')}>
+                <button
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
+                  onClick={() => navigate("/profile")}
+                >
                   <User className="w-4 h-4 text-gray-500" />
                   <span>My Profile</span>
                 </button>
-                <button className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors" onClick={() => navigate('/settings')}>
+                <button
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
+                  onClick={() => navigate("/settings")}
+                >
                   <Settings className="w-4 h-4 text-gray-500" />
                   <span>Account Settings</span>
                 </button>
               </div>
               <div className="py-1 border-t border-gray-100">
-                <button className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors" onClick={handleLogout}>
+                <button
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                  onClick={handleLogout}
+                >
                   <LogOut className="w-4 h-4 text-red-500" />
                   <span>Log out</span>
                 </button>

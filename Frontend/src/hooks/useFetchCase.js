@@ -1,4 +1,3 @@
-// hooks/useFetchCase.js
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -7,12 +6,15 @@ import { AppContext } from "../context/AppContext";
 const useFetchCase = (caseId) => {
   const [caseData, setCaseData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null); // Added error state for better debugging
   const { backendUrl } = useContext(AppContext);
 
   useEffect(() => {
     const fetchCase = async () => {
-      if (!caseId) {
+      if (!caseId || !/^[0-9a-fA-F]{24}$/.test(caseId)) {
+        console.warn("useFetchCase - Invalid or missing caseId:", caseId);
         setCaseData(null);
+        setLoading(false);
         return;
       }
 
@@ -22,26 +24,27 @@ const useFetchCase = (caseId) => {
           withCredentials: true,
         });
 
-        console.log("caseId:", caseId, "Response:", res.data);
+        console.log("useFetchCase - caseId:", caseId, "Full Response:", res.data);
 
-        if (res.data && Object.keys(res.data).length > 0) {
-          setCaseData(res.data);
+        if (res.data.success && res.data.data) {
+          setCaseData(res.data.data); // Set to the case object, not the full response
+          console.log("useFetchCase - Set caseData:", res.data.data);
         } else {
+          console.warn("useFetchCase - No valid case data:", res.data);
           setCaseData(null);
         }
       } catch (error) {
-        console.error("Error fetching case:", error.response?.data || error.message);
+        console.error("useFetchCase - Error fetching case:", error.response?.data || error.message);
+        setError(error.response?.data?.msg || error.message);
 
         // Handle specific status codes
         if (error.response?.status === 403) {
-          // Forbidden: User lacks permission, set data to null silently
+          console.log("useFetchCase - Access denied to case:", caseId);
           setCaseData(null);
-          console.log("Access denied to case:", caseId);
         } else if (error.response?.status === 404) {
-          // Not Found: Case doesn’t exist, set data to null silently
+          console.log("useFetchCase - Case not found:", caseId);
           setCaseData(null);
         } else {
-          // Other errors (e.g., 500, network issues)
           toast.error(error.response?.data?.msg || "Failed to fetch case details");
           setCaseData(null);
         }
@@ -53,7 +56,7 @@ const useFetchCase = (caseId) => {
     fetchCase();
   }, [caseId, backendUrl]);
 
-  return { caseData, loading };
+  return { caseData, loading, error }; // Return error for potential use in CaseCard
 };
 
 export default useFetchCase;

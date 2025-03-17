@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react'; // Added useEffect
 import { FaCalendarAlt, FaPlus, FaCheck } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import { AppContext } from '../../../../context/AppContext';
@@ -19,8 +19,33 @@ function PostCaseForm() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  // Added states for case limit and notifications
+  const [pendingCasesCount, setPendingCasesCount] = useState(0);
+  const [notification, setNotification] = useState(null);
 
-  console.log('PostCaseForm rendered', { userData, backendUrl }); // Debug render
+  console.log('PostCaseForm rendered', { userData, backendUrl });
+
+  // Added useEffect to fetch current pending cases count
+  useEffect(() => {
+    const fetchPendingCases = async () => {
+      if (!userData?._id) return;
+      try {
+        const response = await fetch(`${backendUrl}/api/case/pending-count/${userData._id}`, {
+          method: 'GET',
+          credentials: 'include',
+        });
+        const data = await response.json();
+        if (response.ok) {
+          setPendingCasesCount(data.count);
+        } else {
+          console.error('Error fetching pending cases:', data.msg);
+        }
+      } catch (err) {
+        console.error('Error fetching pending cases:', err);
+      }
+    };
+    fetchPendingCases();
+  }, [userData, backendUrl]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -32,7 +57,7 @@ function PostCaseForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted', { formData, agreed }); // Debug submit start
+    console.log('Form submitted', { formData, agreed });
 
     if (!userData?._id) {
       setError('You must be logged in to create a case.');
@@ -42,6 +67,13 @@ function PostCaseForm() {
     if (!agreed) {
       setError('You must agree to post this case anonymously.');
       console.log('Agreement not checked');
+      return;
+    }
+    // Added check for 3 pending cases limit
+    if (pendingCasesCount >= 3) {
+      setError('You’ve reached your limit of 3 pending cases!');
+      setNotification('You’ve reached your limit of 3 pending cases!');
+      console.log('Pending cases limit reached');
       return;
     }
 
@@ -59,7 +91,7 @@ function PostCaseForm() {
         body: JSON.stringify(formData),
       });
 
-      console.log('Fetch response received', { status: response.status }); // Debug response
+      console.log('Fetch response received', { status: response.status });
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -69,13 +101,16 @@ function PostCaseForm() {
 
       const result = await response.json();
       console.log('Case created successfully:', result);
-      navigate('/lawyer-dashboard');
+      // Added notification for successful case posting
+      setNotification('Your case is now live!');
+      setPendingCasesCount((prev) => prev + 1); // Increment pending count locally
+      navigate('/client-dashboard');
     } catch (err) {
       console.error('Error submitting form:', err);
       setError(err.message);
     } finally {
       setLoading(false);
-      console.log('Loading reset'); // Confirm reset
+      console.log('Loading reset');
     }
   };
 
@@ -92,6 +127,13 @@ function PostCaseForm() {
             <p className="text-sm text-gray-600 text-center mb-6">
               Please avoid including sensitive or personal information.
             </p>
+
+            {/* Added notification display */}
+            {notification && (
+              <div className="mb-6 p-3 bg-green-100 text-green-700 rounded-lg text-center">
+                {notification}
+              </div>
+            )}
 
             {error && (
               <div className="mb-6 p-3 bg-red-100 text-red-700 rounded-lg text-center">
@@ -261,13 +303,18 @@ function PostCaseForm() {
                 </label>
               </div>
 
+              {/* Added note about 14-day expiration */}
+              <div className="mb-6 text-center text-sm text-gray-600">
+                Note: Cases expire after 14 days if no lawyer takes them.
+              </div>
+
               <div className="flex justify-center">
                 <button
                   type="submit"
                   className={`bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full w-full max-w-md transition-colors duration-200 flex items-center justify-center ${
                     loading || !agreed ? 'opacity-50 cursor-not-allowed' : ''
                   }`}
-                  disabled={loading || !agreed}
+                  disabled={loading || !agreed || pendingCasesCount >= 3} // Added pendingCasesCount check
                 >
                   {loading ? 'Submitting...' : (
                     <>
