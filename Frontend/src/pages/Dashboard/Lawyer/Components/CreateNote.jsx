@@ -1,6 +1,6 @@
-// components/NoteForm.jsx
+// frontend/src/pages/Dashboard/Lawyer/Components/NoteForm.jsx
 import React, { useState } from "react";
-import useCreateNote from "../../../hooks/useCreateNote"; // We'll create this hook
+import useCreateNote from "../../../../hooks/useCreateNote";
 
 const NoteForm = ({ clientId, caseId }) => {
   const [content, setContent] = useState("");
@@ -10,7 +10,7 @@ const NoteForm = ({ clientId, caseId }) => {
     e.preventDefault();
     const note = await createNote(content, clientId, caseId);
     if (note) {
-      setContent(""); // Clear the form
+      setContent("");
     }
   };
 

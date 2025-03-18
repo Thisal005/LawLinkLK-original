@@ -1,30 +1,26 @@
+// frontend/src/pages/Dashboard/Lawyer/Components/Case.jsx
 import React, { useContext, useState, useEffect } from "react";
-import { AppContext } from "../Context/AppContext";
+import { AppContext } from "../../../../context/AppContext";
 import { toast } from "react-toastify";
 import { FaComments, FaVideo } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import CaseCard from "../Components/dashboard/lawyer/CaseCard";
-import Sidebar from "../../Client/Components/Sidebar";
-import Header from "../Components/Header";
-import TaskForm from "../Components/dashboard/lawyer/assignTask";
-import NoteForm from "../Components/dashboard/lawyer/CreateNote";
-import TodoList from "../Components/ToDoList";
+import CaseCard from "./CaseCard";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
+import TaskForm from "./LawyerTaskCard";
+import NoteForm from "./CreateNote";
+import TodoList from "./ToDoItem";
 
-/**
- * Case component for displaying case details and related actions.
- */
 function Case() {
-  const { userData, backendUrl } = useContext(AppContext); // Access userData and backendUrl from context
+  const { userData, backendUrl } = useContext(AppContext);
   const navigate = useNavigate();
-  const { caseId } = useParams(); // Get caseId from URL params (e.g., /case/:caseId)
+  const { caseId } = useParams();
 
-  // State for case data and loading
   const [caseData, setCaseData] = useState(null);
   const [clientId, setClientId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch case details when caseId changes
   useEffect(() => {
     const fetchCaseDetails = async () => {
       if (!caseId) {
@@ -39,7 +35,7 @@ function Case() {
         });
         console.log("Case data:", res.data);
         setCaseData(res.data);
-        setClientId(res.data.clientId || null); // Assuming case data includes clientId
+        setClientId(res.data.clientId || null);
       } catch (error) {
         console.error("Error fetching case:", error.response?.data || error.message);
         if (error.response?.status === 403) {
@@ -65,7 +61,6 @@ function Case() {
       <Sidebar activeTab="Dashboard" />
 
       <main className="ml-64 p-6 lg:p-8 pt-24">
-        {/* Case Information Card */}
         <div className="bg-white text-gray-900 rounded-3xl shadow-xl p-5 mb-5 mt-5 relative overflow-hidden transform transition-all duration-300 hover:shadow-2xl w-290">
           <div className="absolute inset-0 opacity-20">
             <div className="absolute top-0 right-0 w-72 h-72 bg-blue-100 rounded-full filter blur-3xl opacity-50 animate-pulse"></div>
@@ -92,7 +87,7 @@ function Case() {
                 </button>
 
                 <button
-                  onClick={() => navigate("/chat")} // Update this to a video call route if needed
+                  onClick={() => navigate("/chat")}
                   className="flex items-center justify-center bg-green-500 hover:bg-green-600 text-white font-semibold py-1.5 px-3 rounded-md shadow-md transition-all transform hover:scale-105 active:scale-95 text-sm"
                 >
                   <FaVideo className="h-5 w-10 mr-1" />
@@ -116,7 +111,6 @@ function Case() {
           </div>
         </div>
 
-        {/* Task Form */}
         {loading ? (
           <p>Loading task form...</p>
         ) : caseData && clientId ? (
@@ -129,10 +123,8 @@ function Case() {
           </div>
         )}
 
-        {/* Grid layout for note forms and todo list */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="grid grid-rows-1 md:grid-rows-2 gap-5">
-            {/* Note Form 1 */}
             <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
               <div className="h-[300px]">
                 {loading ? (
@@ -145,7 +137,6 @@ function Case() {
               </div>
             </div>
 
-            {/* Note Form 2 */}
             <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
               <div className="h-[200px]">
                 {loading ? (
@@ -159,7 +150,6 @@ function Case() {
             </div>
           </div>
 
-          {/* Todo List */}
           <div className="bg-white rounded-2xl shadow-xl p-6 hover:shadow-2xl transition-all">
             <div className="h-[550px]">
               <TodoList />

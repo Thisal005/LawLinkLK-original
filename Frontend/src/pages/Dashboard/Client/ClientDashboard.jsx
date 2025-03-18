@@ -77,7 +77,7 @@ function ClientDashboard() {
                     It looks like you don’t have any cases yet. Let’s get started!
                   </p>
                   <button
-                    onClick={() => navigate("/create-case")}
+                    onClick={() => navigate("/post-case")}
                     className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2 px-6 rounded-lg shadow-md transition-all"
                   >
                     Create Your First Case

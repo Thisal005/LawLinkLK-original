@@ -1,3 +1,4 @@
+// frontend/src/App.jsx
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
@@ -20,16 +21,24 @@ import Newpassword from "./pages/auth/ClientLogin/Newpassword";
 import LawyerCreateAcc from "./pages/auth/Registration/LawyerCreateAcc";
 import LawyerVerifyEmail from "./pages/auth/LawyerLogin/Lawyer-verify-email";
 import LawyerLogin from "./pages/auth/LawyerLogin/LawyerLogin";
-import Notifications from "./pages/Dashboard/Notifications"
+import Notifications from "./pages/Dashboard/Notifications";
 import PostCase from "./pages/Dashboard/Client/Components/CreatePostForm";
 import LawyerEmailForResetPass from "./pages/auth/LawyerLogin/LawyerEmailForResetPass";
 import LawyerNewpassword from "./pages/auth/LawyerLogin/LawyerNewpassword";
 import Chat from "./pages/Dashboard/Chat";
+import CaseDetails from "./pages/Dashboard/Client/Components/CaseDetails";
+import AccountSettings from "./pages/Dashboard/Client/Components/AccountSettings";
+import CaseHistory from "./pages/Dashboard/Client/Components/CaseHistory";
 import Chatbot from "./pages/Dashboard/Client/Components/Chatbot";
-import axios from "axios";
+import LawyerDashboard from "./pages/Dashboard/Lawyer/LawyerDashboard";
+import LawyerAccountSettings from "./pages/Dashboard/Lawyer/Components/LawyerAccountSettings";
+import Case from "./pages/Dashboard/Lawyer/Components/Case";
+import ViewCases from "./pages/Dashboard/Lawyer/Components/ViewCases";
+import CalendarReminders from "./pages/Dashboard/Lawyer/Components/CalendarReminders";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   useEffect(() => {
     console.log("App: Mounting...");
@@ -53,6 +62,7 @@ const App = () => {
             ) : (
               <>
                 <Routes>
+                  {/* Public Routes */}
                   <Route path="/" element={<Home />} />
                   <Route path="/how-it-works" element={<HowItWorks />} />
                   <Route path="/create-account" element={<ClientCreateAcc />} />
@@ -63,9 +73,7 @@ const App = () => {
                     path="/email-for-password-reset"
                     element={<EmailForResetPass />}
                   />
-                  <Route path="/notifications" element={<ProtectedRoute><Notifications/></ProtectedRoute>} />
                   <Route path="/create-new-password" element={<Newpassword />} />
-                  <Route path="/chatbot" element={<Chatbot />} />
                   <Route path="/lawyer-create-account" element={<LawyerCreateAcc />} />
                   <Route path="/lawyer-verify-email" element={<LawyerVerifyEmail />} />
                   <Route path="/lawyer-login" element={<LawyerLogin />} />
@@ -73,12 +81,12 @@ const App = () => {
                     path="/lawyer-email-for-password-reset"
                     element={<LawyerEmailForResetPass />}
                   />
-                  <Route path="/chat" element={<ProtectedRoute><Chat/></ProtectedRoute>} />
-                  <Route path="/post-case" element={<ProtectedRoute><PostCase/></ProtectedRoute>} />
                   <Route
                     path="/lawyer-create-new-password"
                     element={<LawyerNewpassword />}
                   />
+
+                  {/* Protected Routes */}
                   <Route
                     path="/client-dashboard"
                     element={
@@ -87,7 +95,104 @@ const App = () => {
                       </ProtectedRoute>
                     }
                   />
-                  <Route path="/ask-lexi" element={<div>Ask Lexi Page</div>} />
+                  <Route
+                    path="/post-case"
+                    element={
+                      <ProtectedRoute>
+                        <PostCase />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/case/:id"
+                    element={
+                      <ProtectedRoute>
+                        <CaseDetails />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/settings"
+                    element={
+                      <ProtectedRoute>
+                        <AccountSettings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/cases"
+                    element={
+                      <ProtectedRoute>
+                        <CaseHistory />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/notifications"
+                    element={
+                      <ProtectedRoute>
+                        <Notifications />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/chat"
+                    element={
+                      <ProtectedRoute>
+                        <Chat />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/chatbot"
+                    element={
+                      <ProtectedRoute>
+                        <Chatbot />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/lawyer-dashboard"
+                    element={
+                      <ProtectedRoute>
+                        <LawyerDashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/lawyer-settings"
+                    element={
+                      <ProtectedRoute>
+                        <LawyerAccountSettings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/lawyer-case/:caseId"
+                    element={
+                      <ProtectedRoute>
+                        <Case />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/view-cases"
+                    element={
+                      <ProtectedRoute>
+                        <ViewCases />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/calendar"
+                    element={
+                      <ProtectedRoute>
+                        <CalendarReminders onClose={() => navigate(-1)} />
+                      </ProtectedRoute>
+                    }
+                  />
+
+                  {/* Catch-all Route */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
                 <ToastContainer

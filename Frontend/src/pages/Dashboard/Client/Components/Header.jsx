@@ -1,12 +1,12 @@
-// Header.jsx
+// frontend/src/Header.jsx
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { Calendar, HelpCircle, Bell, User, Settings, LogOut } from "lucide-react";
+import { Calendar, HelpCircle, Bell, Settings, LogOut, FileText } from "lucide-react"; // Removed User icon
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { AppContext } from "../../../../context/AppContext";
 
-const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" }) => {
+const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [userMenuVisible, setUserMenuVisible] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -22,11 +22,10 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      // Strengthened ID validation
       if (
         !currentUser?._id ||
         typeof currentUser._id !== "string" ||
-        !/^[0-9a-fA-F]{24}$/.test(currentUser._id) // MongoDB ObjectId format
+        !/^[0-9a-fA-F]{24}$/.test(currentUser._id)
       ) {
         console.warn("Skipping notifications fetch: Invalid or missing user ID", {
           userData,
@@ -41,32 +40,35 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
         const endpoint = lawyerData
           ? `${backendUrl}/api/case/lawyer/notifications`
           : `${backendUrl}/api/case/user/notifications`;
-        console.log("Fetching notifications from:", endpoint, "with user ID:", currentUser._id);
+        console.log("Fetching notifications:", { endpoint, userId: currentUser._id });
         const response = await axios.get(endpoint, { withCredentials: true });
         console.log("Notifications response:", response.data);
         if (response.data.success) {
           setNotifications(response.data.data || []);
         } else {
           setNotifications([]);
-          console.warn("Notifications fetch succeeded but no data:", response.data);
+          console.warn("No notification data:", response.data);
         }
       } catch (error) {
         console.error("Error fetching notifications:", error.response?.data || error.message);
         setNotifications([]);
+        if (error.response?.status === 401) {
+          toast.error("Session expired. Please log in again.");
+          setIsLoggedIn(false);
+          setUserData(null);
+          navigate("/login");
+        }
       } finally {
         setLoadingNotifications(false);
       }
     };
 
-    // Only start polling if user is authenticated
     if (currentUser?._id) {
       fetchNotifications();
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
-    } else {
-      console.log("User not authenticated yet, skipping notifications fetch");
     }
-  }, [currentUser, backendUrl, lawyerData]);
+  }, [currentUser, backendUrl, navigate, setIsLoggedIn, setUserData, lawyerData]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -115,23 +117,22 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
         : `${backendUrl}/api/case/user/notifications/mark-all-read`;
       await axios.post(endpoint, {}, { withCredentials: true });
       setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+      toast.success("All notifications marked as read");
     } catch (error) {
-      console.error("Error marking notifications as read:", error);
+      console.error("Error marking notifications as read:", error.response?.data || error.message);
+      toast.error("Failed to mark notifications as read");
     }
   };
 
-  const addNotification = (message) => {
-    const newNotification = {
-      _id: Date.now().toString(),
-      message,
-      unread: true,
-      createdAt: new Date().toISOString(),
-    };
-    setNotifications((prev) => [newNotification, ...prev]);
+  const handleNotificationClick = (notification) => {
+    if (notification.caseId) {
+      navigate(`/case/${notification.caseId}`);
+      setNotificationsVisible(false);
+    }
   };
 
   return (
-    <header className="fixed top-0 left-0 lg:left-64 xl:left-72 right-0 bg-gradient-to-r from-blue-700 to-blue-500 h-16 flex items-center justify-between px-4 sm:px-6 shadow-md z-30">
+    <header className="fixed top-0 left-0 lg:left-64 xl:left-72 right-0 bg-gradient-to-r from-blue-700 to-blue-500 h-16 flex items-center justify-between px-4 sm:px-6 shadow-md z-30 rounded-bl-3xl rounded-br-none">
       <div className="flex items-center">
         <h1 className="text-lg sm:text-xl font-semibold text-white hidden lg:block">
           Legal Dashboard
@@ -147,6 +148,16 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
             <Calendar className="w-5 h-5 text-white" />
             <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
               Calendar
+            </span>
+          </button>
+          <button
+            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
+            aria-label="Your Cases"
+            onClick={() => navigate("/cases")}
+          >
+            <FileText className="w-5 h-5 text-white" />
+            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              Your Cases
             </span>
           </button>
           <button
@@ -194,12 +205,16 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
                     notifications.map((notification) => (
                       <div
                         key={notification._id}
-                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${notification.unread ? "bg-blue-50" : ""}`}
-                        onClick={() => console.log("Notification clicked:", notification)}
+                        className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                          notification.unread ? "bg-blue-50" : ""
+                        }`}
+                        onClick={() => handleNotificationClick(notification)}
                       >
                         <div className="flex justify-between items-start">
                           <p
-                            className={`text-sm text-gray-800 ${notification.unread ? "font-semibold" : ""}`}
+                            className={`text-sm text-gray-800 ${
+                              notification.unread ? "font-semibold" : ""
+                            }`}
                           >
                             {notification.message}
                           </p>
@@ -241,7 +256,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
             </div>
             <div className="relative">
               <img
-                src="./images/profilepic.jpg"
+                src={currentUser?.profilePic || "./images/profilepic.jpg"}
                 alt={`${displayName}'s profile`}
                 className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-200"
               />
@@ -252,7 +267,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200">
               <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-blue-50">
                 <img
-                  src="./images/profilepic.jpg"
+                  src={currentUser?.profilePic || "./images/profilepic.jpg"}
                   alt={`${displayName}'s profile`}
                   className="w-12 h-12 rounded-full object-cover"
                 />
@@ -262,13 +277,6 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Corporate Law" 
                 </div>
               </div>
               <div className="py-1">
-                <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
-                  onClick={() => navigate("/profile")}
-                >
-                  <User className="w-4 h-4 text-gray-500" />
-                  <span>My Profile</span>
-                </button>
                 <button
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
                   onClick={() => navigate("/settings")}

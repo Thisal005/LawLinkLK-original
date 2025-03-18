@@ -1,6 +1,6 @@
-// components/CaseCard.jsx
+// frontend/src/Components/CaseCard.jsx
 import React from "react";
-import useFetchCase from "../../../hooks/useFetchCase";
+import useFetchCase from "../../../../hooks/useFetchCase";
 
 const CaseCard = ({ caseId }) => {
   const { caseData, loading } = useFetchCase(caseId);

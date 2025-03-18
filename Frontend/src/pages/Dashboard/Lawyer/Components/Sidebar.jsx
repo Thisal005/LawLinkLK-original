@@ -1,57 +1,53 @@
-// Sidebar.jsx
+// frontend/src/pages/Dashboard/Lawyer/Components/Sidebar.jsx
 import React, { useState, useEffect, useContext } from "react";
-import { Grid, FileText, MessageSquare, Menu, X } from "lucide-react";
+import { Grid, Eye, MessageSquare, Menu, X } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
-import useFetchCase from "../../../../hooks/useFetchCase";
 import { AppContext } from "../../../../context/AppContext";
 
-const Sidebar = () => {
+const Sidebar = ({ activeTab }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { userData, backendUrl } = useContext(AppContext);
+  const { lawyerData, backendUrl } = useContext(AppContext);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [userCase, setUserCase] = useState(null);
+  const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchUserCase = async () => {
-      if (!userData?._id) {
-        console.error("User ID not found in AppContext.");
+    const fetchCases = async () => {
+      if (!lawyerData?._id) {
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        const response = await fetch(`${backendUrl}/api/case/user/${userData._id}`, {
+        const response = await fetch(`${backendUrl}/api/case/user/${lawyerData._id}`, {
           credentials: "include",
         });
-        if (!response.ok) {
-          const text = await response.text();
-          console.error("Fetch error response:", text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
         const data = await response.json();
-        const singleCase = data.data && data.data.length > 0 ? data.data[0] : null; // Use data.data
-        setUserCase(singleCase);
+        if (data.success) {
+          setCases(data.data || []);
+        } else {
+          setCases([]);
+        }
       } catch (error) {
-        console.error("Failed to fetch user case:", error);
-        setUserCase(null);
+        console.error("Failed to fetch lawyer cases:", error);
+        setCases([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchUserCase();
-  }, [userData, backendUrl]);
+    fetchCases();
+  }, [lawyerData, backendUrl]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   const navItems = [
-    { path: "/client-dashboard", label: "Dashboard", icon: Grid },
-    { path: "/post-case", label: "Post Case", icon: FileText },
+    { path: "/lawyer-dashboard", label: "Dashboard", icon: Grid },
+    { path: "/view-cases", label: "View Cases", icon: Eye },
     { path: "/chatbot", label: "Chatbot", icon: MessageSquare },
   ];
 
@@ -67,7 +63,7 @@ const Sidebar = () => {
             <div className="text-xl sm:text-2xl font-bold tracking-tight">
               <img
                 onClick={() => {
-                  navigate("/client-dashboard");
+                  navigate("/lawyer-dashboard");
                   setIsSidebarOpen(false);
                 }}
                 style={{ cursor: "pointer" }}
@@ -87,7 +83,7 @@ const Sidebar = () => {
           <nav className="space-y-3 sm:space-y-4 flex-1">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+              const isActive = location.pathname === item.path || activeTab === item.label;
 
               return (
                 <a
@@ -110,33 +106,27 @@ const Sidebar = () => {
               );
             })}
           </nav>
-          {!loading && userCase && (
+          {!loading && cases.length > 0 && (
             <div className="mt-6 px-3 sm:px-4 py-4 bg-blue-700/10 rounded-lg">
               <h3 className="text-xs sm:text-sm font-semibold mb-3 sm:mb-4 text-white/70 uppercase tracking-wide">
-                Your Case
+                Active Cases
               </h3>
               <div className="space-y-3">
-                {(() => {
-                  const { caseData, loading: caseLoading } = useFetchCase(userCase._id);
-                  if (caseLoading) {
-                    return <p className="text-white/70 text-sm">Loading case details...</p>;
-                  }
-                  if (!caseData) {
-                    return <p className="text-white/70 text-sm">Case not found.</p>;
-                  }
-                  return (
-                    <div
-                      className="flex items-center gap-3 px-3 py-2 hover:bg-blue-700/50 rounded-lg cursor-pointer transition-colors"
-                      onClick={() => {
-                        navigate(`/case/${userCase._id}`);
-                        setIsSidebarOpen(false);
-                      }}
-                    >
-                      <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></div>
-                      <span className="font-medium text-sm sm:text-base truncate">{caseData.subject}</span> {/* Updated to subject */}
-                    </div>
-                  );
-                })()}
+                {cases.slice(0, 3).map((caseItem) => (
+                  <div
+                    key={caseItem._id}
+                    className="flex items-center gap-3 px-3 py-2 hover:bg-blue-700/50 rounded-lg cursor-pointer transition-colors"
+                    onClick={() => {
+                      navigate(`/lawyer-case/${caseItem._id}`);
+                      setIsSidebarOpen(false);
+                    }}
+                  >
+                    <div className="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></div>
+                    <span className="font-medium text-sm sm:text-base truncate">
+                      {caseItem.subject}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}

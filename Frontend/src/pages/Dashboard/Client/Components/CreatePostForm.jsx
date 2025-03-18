@@ -1,47 +1,45 @@
-import React, { useState, useContext, useEffect } from 'react'; // Added useEffect
-import { FaCalendarAlt, FaPlus, FaCheck } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
-import { AppContext } from '../../../../context/AppContext';
-import Sidebar from './Sidebar';
-import Header from './Header';
+// frontend/src/PostCaseForm.jsx
+import React, { useState, useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { AppContext } from "../../../../context/AppContext";
+import Sidebar from "./Sidebar";
+import Header from "./Header";
 
 function PostCaseForm() {
   const { userData, backendUrl } = useContext(AppContext);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    subject: '',
-    caseType: '',
-    district: '',
-    courtDate: '',
-    description: '',
-    clientId: userData?._id || '',
+    subject: "",
+    caseType: "",
+    district: "",
+    courtDate: "",
+    description: "",
+    clientId: userData?._id || "",
   });
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  // Added states for case limit and notifications
   const [pendingCasesCount, setPendingCasesCount] = useState(0);
   const [notification, setNotification] = useState(null);
 
-  console.log('PostCaseForm rendered', { userData, backendUrl });
+  console.log("PostCaseForm rendered", { userData, backendUrl });
 
-  // Added useEffect to fetch current pending cases count
   useEffect(() => {
     const fetchPendingCases = async () => {
       if (!userData?._id) return;
       try {
         const response = await fetch(`${backendUrl}/api/case/pending-count/${userData._id}`, {
-          method: 'GET',
-          credentials: 'include',
+          method: "GET",
+          credentials: "include",
         });
         const data = await response.json();
-        if (response.ok) {
+        if (response.ok && data.success) {
           setPendingCasesCount(data.count);
         } else {
-          console.error('Error fetching pending cases:', data.msg);
+          console.error("Error fetching pending cases:", data.msg);
         }
       } catch (err) {
-        console.error('Error fetching pending cases:', err);
+        console.error("Error fetching pending cases:", err);
       }
     };
     fetchPendingCases();
@@ -57,60 +55,58 @@ function PostCaseForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Form submitted', { formData, agreed });
+    console.log("Form submitted", { formData, agreed });
 
     if (!userData?._id) {
-      setError('You must be logged in to create a case.');
-      console.log('No user ID');
+      setError("You must be logged in to create a case.");
+      console.log("No user ID");
       return;
     }
     if (!agreed) {
-      setError('You must agree to post this case anonymously.');
-      console.log('Agreement not checked');
+      setError("You must agree to post this case anonymously.");
+      console.log("Agreement not checked");
       return;
     }
-    // Added check for 3 pending cases limit
     if (pendingCasesCount >= 3) {
-      setError('You’ve reached your limit of 3 pending cases!');
-      setNotification('You’ve reached your limit of 3 pending cases!');
-      console.log('Pending cases limit reached');
+      setError("You’ve reached your limit of 3 pending cases!");
+      setNotification("You’ve reached your limit of 3 pending cases!");
+      console.log("Pending cases limit reached");
       return;
     }
 
     setLoading(true);
     setError(null);
-    console.log('Fetching started');
+    console.log("Fetching started");
 
     try {
       const response = await fetch(`${backendUrl}/api/case/create-case`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        credentials: 'include',
+        credentials: "include",
         body: JSON.stringify(formData),
       });
 
-      console.log('Fetch response received', { status: response.status });
+      console.log("Fetch response received", { status: response.status });
 
       if (!response.ok) {
         const errorData = await response.json();
-        console.log('Fetch error data', errorData);
-        throw new Error(errorData.msg || 'Failed to create case');
+        console.log("Fetch error data", errorData);
+        throw new Error(errorData.msg || "Failed to create case");
       }
 
       const result = await response.json();
-      console.log('Case created successfully:', result);
-      // Added notification for successful case posting
-      setNotification('Your case is now live!');
-      setPendingCasesCount((prev) => prev + 1); // Increment pending count locally
-      navigate('/client-dashboard');
+      console.log("Case created successfully:", result);
+      setNotification("Your case is now live!");
+      setPendingCasesCount((prev) => prev + 1);
+      navigate("/client-dashboard");
     } catch (err) {
-      console.error('Error submitting form:', err);
+      console.error("Error submitting form:", err);
       setError(err.message);
     } finally {
       setLoading(false);
-      console.log('Loading reset');
+      console.log("Loading reset");
     }
   };
 
@@ -118,7 +114,7 @@ function PostCaseForm() {
     <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 flex flex-col lg:ml-64 xl:ml-72">
-        <Header />
+        <Header displayName={userData?.fullName || "Client"} practiceAreas="Client" />
         <main className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 pt-20 lg:pt-24">
           <div className="bg-white rounded-lg shadow-lg p-6 sm:p-8 w-full max-w-4xl border-t-4 border-blue-600">
             <h2 className="text-2xl sm:text-3xl font-bold text-blue-700 text-center mb-4">
@@ -128,7 +124,6 @@ function PostCaseForm() {
               Please avoid including sensitive or personal information.
             </p>
 
-            {/* Added notification display */}
             {notification && (
               <div className="mb-6 p-3 bg-green-100 text-green-700 rounded-lg text-center">
                 {notification}
@@ -169,74 +164,38 @@ function PostCaseForm() {
                   <label className="block text-lg font-medium text-blue-600 mb-2">
                     Case Type
                   </label>
-                  <div className="relative">
-                    <select
-                      name="caseType"
-                      value={formData.caseType}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      disabled={loading}
-                      required
-                    >
-                      <option value="">Select case type</option>
-                      <option value="criminal">Criminal</option>
-                      <option value="civil">Civil</option>
-                      <option value="family">Family</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
+                  <select
+                    name="caseType"
+                    value={formData.caseType}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    disabled={loading}
+                    required
+                  >
+                    <option value="">Select case type</option>
+                    <option value="criminal">Criminal</option>
+                    <option value="civil">Civil</option>
+                    <option value="family">Family</option>
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-lg font-medium text-blue-600 mb-2">
                     District
                   </label>
-                  <div className="relative">
-                    <select
-                      name="district"
-                      value={formData.district}
-                      onChange={handleChange}
-                      className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      disabled={loading}
-                      required
-                    >
-                      <option value="">Select district</option>
-                      <option value="colombo">Colombo</option>
-                      <option value="gampaha">Gampaha</option>
-                      <option value="kandy">Kandy</option>
-                    </select>
-                    <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                      <svg
-                        className="w-5 h-5 text-gray-400"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M19 9l-7 7-7-7"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
+                  <select
+                    name="district"
+                    value={formData.district}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    disabled={loading}
+                    required
+                  >
+                    <option value="">Select district</option>
+                    <option value="colombo">Colombo</option>
+                    <option value="gampaha">Gampaha</option>
+                    <option value="kandy">Kandy</option>
+                  </select>
                 </div>
               </div>
 
@@ -244,46 +203,30 @@ function PostCaseForm() {
                 <label className="block text-lg font-medium text-blue-600 mb-2">
                   Court Date
                 </label>
-                <div className="relative">
-                  <input
-                    type="date"
-                    name="courtDate"
-                    value={formData.courtDate}
-                    onChange={handleChange}
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                    disabled={loading}
-                    required
-                  />
-                  <div className="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
-                    <FaCalendarAlt className="text-gray-400" />
-                  </div>
-                </div>
+                <input
+                  type="date"
+                  name="courtDate"
+                  value={formData.courtDate}
+                  onChange={handleChange}
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  disabled={loading}
+                  required
+                />
               </div>
 
               <div className="mb-6">
                 <label className="block text-lg font-medium text-blue-600 mb-2">
                   Description
                 </label>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-300">
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Provide a general description (no personal details)"
-                    className="w-full p-3 bg-white border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none h-32 overflow-y-auto"
-                    disabled={loading}
-                    required
-                  ></textarea>
-                  <div className="flex justify-end mt-2">
-                    <button
-                      type="button"
-                      className="text-gray-400 hover:text-blue-500"
-                      disabled={loading}
-                    >
-                      <FaPlus />
-                    </button>
-                  </div>
-                </div>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  placeholder="Provide a general description (no personal details)"
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none h-32"
+                  disabled={loading}
+                  required
+                />
               </div>
 
               <div className="mb-6 flex items-center justify-center">
@@ -292,18 +235,14 @@ function PostCaseForm() {
                   id="agree"
                   checked={agreed}
                   onChange={(e) => setAgreed(e.target.checked)}
-                  className="w-5 h-5 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
+                  className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                   disabled={loading}
                 />
-                <label
-                  htmlFor="agree"
-                  className="ml-2 text-sm text-gray-700 font-medium"
-                >
+                <label htmlFor="agree" className="ml-2 text-sm text-gray-700 font-medium">
                   I agree to post this case anonymously and confirm it contains no sensitive information.
                 </label>
               </div>
 
-              {/* Added note about 14-day expiration */}
               <div className="mb-6 text-center text-sm text-gray-600">
                 Note: Cases expire after 14 days if no lawyer takes them.
               </div>
@@ -311,16 +250,12 @@ function PostCaseForm() {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className={`bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full w-full max-w-md transition-colors duration-200 flex items-center justify-center ${
-                    loading || !agreed ? 'opacity-50 cursor-not-allowed' : ''
+                  className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full w-full max-w-md transition-colors duration-200 ${
+                    loading || !agreed || pendingCasesCount >= 3 ? "opacity-50 cursor-not-allowed" : ""
                   }`}
-                  disabled={loading || !agreed || pendingCasesCount >= 3} // Added pendingCasesCount check
+                  disabled={loading || !agreed || pendingCasesCount >= 3}
                 >
-                  {loading ? 'Submitting...' : (
-                    <>
-                      <FaCheck className="mr-2" /> Post Case
-                    </>
-                  )}
+                  {loading ? "Submitting..." : "Post Case"}
                 </button>
               </div>
             </form>

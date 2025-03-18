@@ -1,3 +1,4 @@
+// frontend/src/Sidebar.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { Grid, FileText, MessageSquare, Menu, X, Lock } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -31,7 +32,6 @@ const Sidebar = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Prioritize active case: prefer "ongoing" over "pending"
         const cases = data.data || [];
         const activeCase =
           cases.find((c) => c.status === "ongoing") ||

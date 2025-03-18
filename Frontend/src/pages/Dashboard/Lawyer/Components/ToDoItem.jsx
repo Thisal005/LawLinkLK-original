@@ -1,6 +1,6 @@
-// components/TodoItem.jsx
+// frontend/src/pages/Dashboard/Lawyer/Components/TodoItem.jsx
 import React from "react";
-import useUpdateTodoStatus from "../../../hooks/useUpdateTodoStatus"; // We'll create this hook
+import useUpdateTodoStatus from "../../../../hooks/useUpdateTodoStatus";
 
 const TodoItem = ({ todo, onUpdate }) => {
   const { loading, updateTodoStatus } = useUpdateTodoStatus();
@@ -9,7 +9,7 @@ const TodoItem = ({ todo, onUpdate }) => {
     const newStatus = todo.status === "pending" ? "completed" : "pending";
     const updatedTodo = await updateTodoStatus(todo._id, newStatus);
     if (updatedTodo) {
-      onUpdate(); // Refresh the list
+      onUpdate();
     }
   };
 
