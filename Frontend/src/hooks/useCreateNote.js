@@ -2,7 +2,7 @@
 import { useState, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AppContext } from "../Context/AppContext";
+import { AppContext } from "../context/AppContext";
 
 const useCreateNote = () => {
   const [loading, setLoading] = useState(false);
