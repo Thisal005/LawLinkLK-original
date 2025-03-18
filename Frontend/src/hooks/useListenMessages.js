@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useSocketContext } from "../Context/SocketContext";
+import { useSocketContext } from "../context/SocketContext";
 import useConversation from "../zustand/useConversation";
 
 const useListenMessages = () => {

@@ -2,7 +2,7 @@
 import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AppContext } from "../Context/AppContext";
+import { AppContext } from "../context/AppContext";
 
 const useFetchTodos = () => {
   const [todos, setTodos] = useState([]);

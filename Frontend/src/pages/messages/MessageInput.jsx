@@ -1,7 +1,7 @@
 import { useState, useContext, useRef } from 'react';
 import { Paperclip, Send, X, Image } from 'lucide-react';
 import useSendMessage from '../../hooks/useSendMessage';
-import { AppContext } from '../../Context/AppContext';
+import { AppContext } from '../../context/AppContext';
 
 const MessageInput = () => {
     const [message, setMessage] = useState('');
