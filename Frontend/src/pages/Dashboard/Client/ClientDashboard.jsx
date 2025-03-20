@@ -1,4 +1,4 @@
-// ClientDashboard.jsx
+// frontend/src/pages/Dashboard/Client/ClientDashboard.jsx
 import React, { useContext, useState, useEffect } from "react";
 import { AppContext } from "../../../context/AppContext";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +16,6 @@ function ClientDashboard() {
   const navigate = useNavigate();
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Added state for expired cases visibility
   const [showExpired, setShowExpired] = useState(true);
 
   useEffect(() => {
@@ -86,7 +85,7 @@ function ClientDashboard() {
               )}
             </div>
             <div className="self-center md:self-start">
-              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm transform transition-all duration-300 hover:shadow-lg">
+              <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm transform transition-all duration  duration-300 hover:shadow-lg">
                 <video
                   src={lawyer2}
                   autoPlay
@@ -99,7 +98,6 @@ function ClientDashboard() {
             </div>
           </div>
         </div>
-        {/* Added section for all cases including expired */}
         <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-semibold text-gray-900">Your Cases</h3>
@@ -130,7 +128,9 @@ function ClientDashboard() {
             <div className="p-4 border rounded-lg hover:bg-gray-50 transition-all">
               <h4 className="font-medium text-gray-800">Learn the Basics</h4>
               <p className="text-gray-600">Watch a tutorial on managing your cases.</p>
-              <a href="/tutorial" className="text-indigo-600 hover:underline">Watch Now</a>
+              <a href="/tutorial" className="text-indigo-600 hover:underline">
+                Watch Now
+              </a>
             </div>
             <div className="p-4 border rounded-lg hover:bg-gray-50 transition-all">
               <h4 className="font-medium text-gray-800">Contact Support</h4>
@@ -145,7 +145,9 @@ function ClientDashboard() {
             <div className="p-4 border rounded-lg hover:bg-gray-50 transition-all">
               <h4 className="font-medium text-gray-800">Explore Features</h4>
               <p className="text-gray-600">Discover what you can do with your dashboard.</p>
-              <a href="/features" className="text-indigo-600 hover:underline">Learn More</a>
+              <a href="/features" className="text-indigo-600 hover:underline">
+                Learn More
+              </a>
             </div>
           </div>
         </div>

@@ -1,29 +1,35 @@
+// backend/middleware/lawyerAuth.js
 import jwt from "jsonwebtoken";
 import Lawyer from "../models/lawyer.model.js";
 
 const lawyerAuth = async (req, res, next) => {
-    try {
-        const token = req.cookies.jwt;
-        if (!token) {
-            return res.status(401).json({ msg: "Unauthorized" });
-        }
+  try {
+    console.log("lawyerAuth - Starting");
+    console.log("Cookies:", req.cookies);
 
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!decoded) {
-            return res.status(401).json({ msg: "Unauthorized" });
-        }
-
-        const lawyer = await Lawyer.findById(decoded.userId).select("-password");
-        if (!lawyer) {
-            return res.status(401).json({ msg: "Lawyer not found" });
-        }
-
-        req.lawyer = lawyer;
-        next();
-    } catch (err) {
-        console.log("Error in lawyerAuth middleware:", err.message);
-        res.status(401).json({ msg: "Unauthorized" });
+    const token = req.cookies.jwt;
+    if (!token) {
+      console.log("lawyerAuth - No token");
+      return res.status(401).json({ success: false, msg: "Unauthorized: No token provided" });
     }
+
+    console.log("lawyerAuth - Token:", token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log("lawyerAuth - Decoded:", decoded);
+
+    const lawyer = await Lawyer.findById(decoded.userId).select("-password");
+    if (!lawyer) {
+      console.log("lawyerAuth - No lawyer for ID:", decoded.userId);
+      return res.status(401).json({ success: false, msg: "Unauthorized: Lawyer not found" });
+    }
+
+    console.log("lawyerAuth - Success:", lawyer);
+    req.lawyer = lawyer;
+    next();
+  } catch (err) {
+    console.error("lawyerAuth - Error:", err.message, err.stack);
+    return res.status(401).json({ success: false, msg: `Unauthorized: ${err.message}` });
+  }
 };
 
 export default lawyerAuth;

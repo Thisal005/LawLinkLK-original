@@ -1,6 +1,6 @@
-// frontend/src/Header.jsx
+// frontend/src/pages/Dashboard/Client/Components/Header.jsx
 import React, { useState, useContext, useRef, useEffect } from "react";
-import { Calendar, HelpCircle, Bell, Settings, LogOut, FileText } from "lucide-react"; // Removed User icon
+import { Calendar, HelpCircle, Bell, Settings, LogOut, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -22,11 +22,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (
-        !currentUser?._id ||
-        typeof currentUser._id !== "string" ||
-        !/^[0-9a-fA-F]{24}$/.test(currentUser._id)
-      ) {
+      if (!currentUser?._id || !/^[0-9a-fA-F]{24}$/.test(currentUser._id)) {
         console.warn("Skipping notifications fetch: Invalid or missing user ID", {
           userData,
           lawyerData,
@@ -79,7 +75,6 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
         setUserMenuVisible(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -125,8 +120,8 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
   };
 
   const handleNotificationClick = (notification) => {
-    if (notification.caseId) {
-      navigate(`/case/${notification.caseId}`);
+    if (notification.metadata?.caseId) {
+      navigate(`/case/${notification.metadata.caseId}`);
       setNotificationsVisible(false);
     }
   };

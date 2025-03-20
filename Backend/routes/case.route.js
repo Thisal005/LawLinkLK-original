@@ -3,13 +3,14 @@ import express from "express";
 import Case from "../models/case.model.js";
 import Notification from "../models/notifications.model.js";
 import { protectRoute } from "../middleware/protectRoute.js";
-import lawyerAuth from "../middleware/lawyerAuth.js"; // Add your lawyer auth middleware
+import lawyerAuth from "../middleware/lawyerAuth.js";
 import { createCase } from "../controllers/case.controller.js";
 import mongoose from "mongoose";
 
 const caseRouter = express.Router();
 
 const sendResponse = (res, status, success, data, msg) => {
+  console.log(`Response sent - Status: ${status}, Msg: ${msg}`);
   res.status(status).json({ success, data, msg });
 };
 
@@ -170,10 +171,10 @@ caseRouter.post("/user/notifications/mark-all-read", protectRoute, async (req, r
 });
 
 // Get lawyer notifications
-caseRouter.get("/lawyer/notifications", protectRoute, async (req, res) => {
+caseRouter.get("/lawyer/notifications", lawyerAuth, async (req, res) => {
   try {
-    console.log("Get lawyer notifications - req.user:", req.user);
-    const userId = req.user._id.toString();
+    console.log("Get lawyer notifications - req.lawyer:", req.lawyer);
+    const userId = req.lawyer._id.toString();
 
     const notifications = await Notification.find({ userId, userType: "Lawyer" })
       .sort({ createdAt: -1 })
@@ -190,10 +191,10 @@ caseRouter.get("/lawyer/notifications", protectRoute, async (req, res) => {
 });
 
 // Mark all lawyer notifications as read
-caseRouter.post("/lawyer/notifications/mark-all-read", protectRoute, async (req, res) => {
+caseRouter.post("/lawyer/notifications/mark-all-read", lawyerAuth, async (req, res) => {
   try {
-    console.log("Mark lawyer notifications - req.user:", req.user);
-    const userId = req.user._id.toString();
+    console.log("Mark lawyer notifications - req.lawyer:", req.lawyer);
+    const userId = req.lawyer._id.toString();
 
     const result = await Notification.updateMany(
       { userId, userType: "Lawyer", unread: true },
@@ -236,68 +237,19 @@ caseRouter.get("/pending-count/:clientId", protectRoute, async (req, res) => {
   }
 });
 
-// Get participants of a case
-caseRouter.get("/:caseId/participants", protectRoute, async (req, res) => {
-  try {
-    console.log("Get case participants - req.user:", req.user);
-    const { caseId } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(caseId)) {
-      return sendResponse(res, 400, false, null, "Invalid case ID");
-    }
-
-    const caseData = await Case.findById(caseId)
-      .populate("clientId", "fullName email contact")
-      .populate("lawyerId", "fullName email contact");
-
-    if (!caseData) {
-      return sendResponse(res, 404, false, null, "Case not found");
-    }
-
-    const isClient = caseData.clientId._id.toString() === req.user._id.toString();
-    const isLawyer = caseData.lawyerId?._id.toString() === req.user._id.toString();
-
-    if (!isClient && !isLawyer) {
-      return sendResponse(res, 403, false, null, "Unauthorized");
-    }
-
-    const participants = {
-      client: {
-        id: caseData.clientId._id,
-        fullName: caseData.clientId.fullName,
-        email: caseData.clientId.email,
-        contact: caseData.clientId.contact || "N/A",
-      },
-      lawyer: caseData.lawyerId
-        ? {
-            id: caseData.lawyerId._id,
-            fullName: caseData.lawyerId.fullName,
-            email: caseData.lawyerId.email,
-            contact: caseData.lawyerId.contact || "N/A",
-          }
-        : null,
-    };
-
-    sendResponse(res, 200, true, participants, "Case participants retrieved successfully");
-  } catch (error) {
-    console.error("Error fetching case participants:", error);
-    sendResponse(res, 500, false, null, `Server error: ${error.message}`);
-  }
-});
-
-// NEW: Get all unassigned cases for lawyers
+// Get all unassigned cases for lawyers
 caseRouter.get("/all", lawyerAuth, async (req, res) => {
   try {
-    console.log("Get all cases - req.lawyer:", req.lawyer);
+    console.log("GET /api/case/all - Request received");
+    console.log("req.lawyer:", req.lawyer);
 
-    // Fetch all unassigned cases (lawyerId is null) that haven't expired
     const currentDate = new Date();
     const cases = await Case.find({
       lawyerId: null,
-      expiresAt: { $gt: currentDate }, // Only fetch cases that haven't expired
-    })
-      .populate("clientId", "fullName email")
-      .select("subject caseType district courtDate description status createdAt expiresAt");
+      expiresAt: { $gt: currentDate },
+    }).select("subject description _id");
+
+    console.log("Fetched cases:", cases);
 
     if (!cases || cases.length === 0) {
       return sendResponse(res, 200, true, [], "No unassigned cases available.");
@@ -305,7 +257,49 @@ caseRouter.get("/all", lawyerAuth, async (req, res) => {
 
     sendResponse(res, 200, true, cases, "All unassigned cases retrieved successfully");
   } catch (error) {
-    console.error("Error fetching all cases:", error);
+    console.error("Error fetching all cases:", error.message, error.stack);
+    sendResponse(res, 500, false, null, `Server error: ${error.message}`);
+  }
+});
+
+// Lawyer sends an offer
+caseRouter.post("/offer/:caseId", lawyerAuth, async (req, res) => {
+  try {
+    const { caseId } = req.params;
+    const lawyerId = req.lawyer._id;
+
+    if (!mongoose.Types.ObjectId.isValid(caseId)) {
+      return sendResponse(res, 400, false, null, "Invalid case ID");
+    }
+
+    const caseData = await Case.findById(caseId);
+    if (!caseData || caseData.lawyerId) {
+      return sendResponse(res, 404, false, null, "Case not found or already assigned");
+    }
+
+    const notification = new Notification({
+      userId: caseData.clientId,
+      userType: "User",
+      message: `A lawyer is interested in your case: "${caseData.subject}"`,
+      createdAt: new Date(),
+      unread: true,
+      metadata: { lawyerId, caseId },
+    });
+    await notification.save();
+
+    const clientWs = global.clients.get(caseData.clientId.toString());
+    if (clientWs && clientWs.readyState === WebSocket.OPEN) {
+      clientWs.send(
+        JSON.stringify({
+          type: "notification",
+          message: `A lawyer is interested in your case: "${caseData.subject}"`,
+        })
+      );
+    }
+
+    sendResponse(res, 200, true, null, "Offer sent successfully");
+  } catch (error) {
+    console.error("Error sending offer:", error.message, error.stack);
     sendResponse(res, 500, false, null, `Server error: ${error.message}`);
   }
 });

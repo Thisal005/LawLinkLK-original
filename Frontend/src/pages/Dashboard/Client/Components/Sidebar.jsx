@@ -1,8 +1,9 @@
-// frontend/src/Sidebar.jsx
+// frontend/src/pages/Dashboard/Client/Components/Sidebar.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { Grid, FileText, MessageSquare, Menu, X, Lock } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { AppContext } from "../../../../context/AppContext";
+import axios from "axios";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -23,23 +24,17 @@ const Sidebar = () => {
 
       setLoading(true);
       try {
-        const response = await fetch(`${backendUrl}/api/case/user/${userData._id}`, {
-          credentials: "include",
+        const response = await axios.get(`${backendUrl}/api/case/user/${userData._id}`, {
+          withCredentials: true,
         });
-        if (!response.ok) {
-          const text = await response.text();
-          console.error("Fetch error response:", text);
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const cases = data.data || [];
+        const cases = response.data.data || [];
         const activeCase =
           cases.find((c) => c.status === "ongoing") ||
           cases.find((c) => c.status === "pending") ||
           null;
         setUserCase(activeCase);
       } catch (error) {
-        console.error("Failed to fetch user case:", error);
+        console.error("Failed to fetch user case:", error.response?.data || error.message);
         setUserCase(null);
       } finally {
         setLoading(false);
@@ -49,27 +44,12 @@ const Sidebar = () => {
     const fetchPendingCases = async () => {
       if (!userData?._id) return;
       try {
-        const response = await fetch(`${backendUrl}/api/case/pending-count/${userData._id}`, {
-          credentials: "include",
+        const response = await axios.get(`${backendUrl}/api/case/pending-count/${userData._id}`, {
+          withCredentials: true,
         });
-        if (!response.ok) {
-          const text = await response.text();
-          if (response.status === 404) {
-            console.warn("Pending count endpoint not found yet.");
-            setPendingCasesCount(0);
-            return;
-          }
-          throw new Error(`HTTP error! status: ${response.status}, response: ${text}`);
-        }
-        const contentType = response.headers.get("content-type");
-        if (!contentType || !contentType.includes("application/json")) {
-          const text = await response.text();
-          throw new Error(`Expected JSON, got: ${text}`);
-        }
-        const data = await response.json();
-        setPendingCasesCount(data.count || 0);
+        setPendingCasesCount(response.data.data?.count || 0);
       } catch (error) {
-        console.error("Error fetching pending cases:", error);
+        console.error("Error fetching pending cases:", error.response?.data || error.message);
         setPendingCasesCount(0);
       }
     };

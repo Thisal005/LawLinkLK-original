@@ -15,13 +15,8 @@ import taskRouter from "./routes/tasks.route.js";
 import notificationRouter from "./routes/notification.route.js";
 import noteRouter from "./routes/note.route.js";
 import todoRouter from "./routes/todo.route.js";
-import chatbotRoutes from "./routes/chatbot.route.js"; // Fixed typo
+import chatbotRoutes from "./routes/chatbot.route.js";
 import { protectRoute } from "./middleware/protectRoute.js";
-
-import User from "./models/user.model.js";
-import Lawyer from "./models/lawyer.model.js";
-import Case from "./models/case.model.js";
-import Notification from "./models/notifications.model.js";
 
 dotenv.config();
 
@@ -31,18 +26,14 @@ const PORT = process.env.PORT || 5000;
 app.use(express.json());
 app.use(cookieParser());
 
+// Log all requests
 app.use((req, res, next) => {
-  try {
-    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-    console.log("Headers:", req.headers);
-    console.log("Cookies:", req.cookies);
-    next();
-  } catch (error) {
-    console.error("Logging middleware error:", error);
-    next(error);
-  }
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  console.log("Cookies:", req.cookies);
+  next();
 });
 
+// CORS config
 const allowedOrigins = ["http://localhost:5173"];
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 
@@ -65,8 +56,7 @@ app.use((err, req, res, next) => {
   console.error("Server error:", err.stack);
   res.status(500).json({
     success: false,
-    error: "Internal Server Error",
-    message: process.env.NODE_ENV === "development" ? err.message : "Something went wrong",
+    msg: "Internal Server Error",
   });
 });
 
@@ -75,7 +65,6 @@ const startServer = async () => {
     await connectTomongoDB();
     const server = app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-      console.log("Gemini API Key loaded:", !!process.env.GEMINI_API_KEY);
     });
 
     global.clients = new Map();
@@ -96,8 +85,6 @@ const startServer = async () => {
             if (recipientWs && recipientWs.readyState === WebSocket.OPEN) {
               recipientWs.send(JSON.stringify({ type: "message", message: data.message }));
               console.log(`Message sent to ${data.receiverId}`);
-            } else {
-              console.log(`Recipient ${data.receiverId} not connected`);
             }
           }
         } catch (error) {
@@ -113,22 +100,12 @@ const startServer = async () => {
         }
       });
 
-      ws.on("error", (error) => {
-        console.error("WebSocket error:", error);
-      });
+      ws.on("error", (error) => console.error("WebSocket error:", error));
     });
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
   }
 };
-
-process.on("uncaughtException", (error) => {
-  console.error("Uncaught Exception:", error);
-});
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.error("Unhandled Rejection at:", promise, "reason:", reason);
-});
 
 startServer();
