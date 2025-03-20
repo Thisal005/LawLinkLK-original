@@ -1,15 +1,88 @@
-import React from "react";
+import React, { useState, useEffect, useContext } from "react";
 import useFetchCase from "../../../../hooks/useFetchCase";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { AppContext } from "../../../../context/AppContext";
 
 const CaseCard = ({ caseId }) => {
   const { caseData, loading } = useFetchCase(caseId);
   const navigate = useNavigate();
+  const { backendUrl, userData } = useContext(AppContext);
+  const [offers, setOffers] = useState([]);
+  const [offerLoading, setOfferLoading] = useState(false);
 
-  // Debug logs
-  console.log("CaseCard - Input caseId:", caseId);
-  console.log("CaseCard - Fetched caseData:", caseData);
-  console.log("CaseCard - Loading:", loading);
+  useEffect(() => {
+    const fetchOffers = async () => {
+      if (!caseId || !userData?._id || loading || !caseData || caseData.lawyerId) {
+        setOffers([]);
+        return;
+      }
+
+      setOfferLoading(true);
+      try {
+        const response = await axios.get(`${backendUrl}/api/case/user/notifications`, {
+          withCredentials: true,
+        });
+        const caseOffers = response.data.data
+          .filter(
+            (n) =>
+              n.unread &&
+              n.metadata?.caseId === caseId &&
+              n.message.includes("A lawyer is interested")
+          )
+          .map((n) => ({
+            notificationId: n._id,
+            lawyerId: n.metadata.lawyerId,
+            message: n.message,
+          }));
+        setOffers(caseOffers);
+      } catch (error) {
+        console.error("Error fetching offers:", error.response?.data || error.message);
+        setOffers([]);
+        toast.error("Failed to fetch offers");
+      } finally {
+        setOfferLoading(false);
+      }
+    };
+
+    fetchOffers();
+  }, [caseId, userData, backendUrl, loading, caseData]);
+
+  const handleAcceptOffer = async (lawyerId) => {
+    try {
+      const response = await axios.patch(
+        `${backendUrl}/api/case/accept-offer/${caseId}`,
+        { lawyerId },
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setOffers((prev) => prev.filter((o) => o.lawyerId !== lawyerId));
+        toast.success("Offer accepted!");
+        window.location.reload(); // Refetch case data
+      }
+    } catch (error) {
+      console.error("Error accepting offer:", error.response?.data || error.message);
+      toast.error(error.response?.data?.msg || "Failed to accept offer");
+    }
+  };
+
+  const handleRejectOffer = async (notificationId) => {
+    try {
+      const response = await axios.post(
+        `${backendUrl}/api/case/reject-offer/${notificationId}`,
+        {},
+        { withCredentials: true }
+      );
+      if (response.data.success) {
+        setOffers((prev) => prev.filter((o) => o.notificationId !== notificationId));
+        toast.success("Offer rejected");
+      }
+    } catch (error) {
+      console.error("Error rejecting offer:", error.response?.data || error.message);
+      toast.error(error.response?.data?.msg || "Failed to reject offer");
+    }
+  };
 
   if (loading) {
     return <p className="text-gray-600">Loading case details...</p>;
@@ -135,6 +208,44 @@ const CaseCard = ({ caseId }) => {
           </span>
         </li>
       </ul>
+      {isPending && (
+        <div className="mt-4 border-t border-gray-100 pt-4">
+          <h4 className="text-sm font-semibold text-gray-700">Offers</h4>
+          {offerLoading ? (
+            <p className="text-gray-600">Loading offers...</p>
+          ) : offers.length > 0 ? (
+            <ul className="space-y-2">
+              {offers.map((offer) => (
+                <li key={offer.notificationId} className="flex items-center justify-between">
+                  <span className="text-sm text-gray-800">{offer.message}</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAcceptOffer(offer.lawyerId);
+                      }}
+                      className="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1 px-2 rounded transition-all"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRejectOffer(offer.notificationId);
+                      }}
+                      className="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded transition-all"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-sm text-gray-600">No offers yet.</p>
+          )}
+        </div>
+      )}
     </article>
   );
 };

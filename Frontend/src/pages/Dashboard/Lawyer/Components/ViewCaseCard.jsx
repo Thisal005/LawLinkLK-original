@@ -1,9 +1,19 @@
-// frontend/src/pages/Dashboard/Lawyer/Components/CaseCard.jsx
 import React from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
-const CaseCard = ({ title, description, expanded, onSendOffer }) => {
+const ViewCaseCard = ({ title, description, expanded, onSendOffer }) => {
   const [isExpanded, setIsExpanded] = React.useState(expanded);
+  const [isSending, setIsSending] = React.useState(false);
+
+  const handleSendOfferClick = async (e) => {
+    e.stopPropagation();
+    setIsSending(true);
+    try {
+      await onSendOffer();
+    } finally {
+      setIsSending(false);
+    }
+  };
 
   return (
     <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -36,10 +46,15 @@ const CaseCard = ({ title, description, expanded, onSendOffer }) => {
               </ul>
             </div>
             <button
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              onClick={onSendOffer}
+              className={`px-6 py-2 text-white rounded-lg ${
+                isSending
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700"
+              }`}
+              onClick={handleSendOfferClick}
+              disabled={isSending}
             >
-              WRITE AN OFFER
+              {isSending ? "Sending..." : "WRITE AN OFFER"}
             </button>
           </div>
         </div>
@@ -48,4 +63,4 @@ const CaseCard = ({ title, description, expanded, onSendOffer }) => {
   );
 };
 
-export default CaseCard;
+export default ViewCaseCard;

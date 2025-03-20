@@ -45,7 +45,6 @@ const caseSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-  // Added expiration field
   expiresAt: {
     type: Date,
     default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from creation

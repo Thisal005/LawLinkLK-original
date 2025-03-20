@@ -1,4 +1,4 @@
-// frontend/src/pages/Dashboard/Lawyer/Components/ViewCases.jsx
+// ViewCases.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { AppContext } from "../../../../context/AppContext";
 import { toast } from "react-toastify";
@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
-import CaseCard from "./ViewCaseCard";
+import ViewCaseCard from "./ViewCaseCard";
 
 const ViewCases = () => {
   const { lawyerData, backendUrl } = useContext(AppContext);
@@ -27,6 +27,7 @@ const ViewCases = () => {
       try {
         console.log("Fetching cases from:", `${backendUrl}/api/case/all`);
         console.log("Lawyer ID:", lawyerData._id);
+        console.log("Cookies sent:", document.cookie);
 
         const response = await axios.get(`${backendUrl}/api/case/all`, {
           withCredentials: true,
@@ -36,7 +37,7 @@ const ViewCases = () => {
         console.log("Response Data:", response.data);
 
         if (response.data.success) {
-          const caseData = response.data.data || [];
+          const caseData = response.data.data || []; // Your backend uses 'data'
           console.log("Cases received:", caseData);
           setCases(caseData);
           if (caseData.length === 0) {
@@ -47,17 +48,27 @@ const ViewCases = () => {
           console.error("API success false:", response.data.msg);
           toast.error(response.data.msg || "Failed to fetch cases.");
           setCases([]);
+          if (response.data.msg === "Unauthorized") {
+            navigate("/lawyer-login");
+          }
         }
       } catch (error) {
         console.error("Error fetching cases:", {
           message: error.message,
-          response: error.response ? {
-            status: error.response.status,
-            data: error.response.data,
-          } : "No response",
+          response: error.response
+            ? {
+                status: error.response.status,
+                data: error.response.data,
+              }
+            : "No response",
         });
-        toast.error(error.response?.data?.msg || "Something went wrong.");
+        toast.error(error.response?.data?.msg || "Something went wrong fetching cases.");
         setCases([]);
+        if (error.response?.status === 401) {
+          console.log("Auth failure detected, redirecting to login");
+          toast.error("Session expired. Please log in again.");
+          navigate("/lawyer-login");
+        }
       } finally {
         setLoading(false);
       }
@@ -68,19 +79,26 @@ const ViewCases = () => {
 
   const handleSendOffer = async (caseId) => {
     try {
+      console.log("Sending offer for case:", caseId);
       const response = await axios.post(
         `${backendUrl}/api/case/offer/${caseId}`,
         {},
         { withCredentials: true }
       );
+      console.log("Offer response:", response.data);
       if (response.data.success) {
         toast.success("Offer sent to the client!");
+        setCases(cases.filter((c) => c._id !== caseId)); // Remove case from list
       } else {
         toast.error(response.data.msg || "Failed to send offer.");
       }
     } catch (error) {
-      console.error("Error sending offer:", error.response?.data);
+      console.error("Error sending offer:", error.response?.data || error.message);
       toast.error(error.response?.data?.msg || "Failed to send offer.");
+      if (error.response?.status === 401) {
+        toast.error("Session expired. Please log in again.");
+        navigate("/lawyer-login");
+      }
     }
   };
 
@@ -105,7 +123,7 @@ const ViewCases = () => {
           ) : cases.length > 0 ? (
             <div className="max-w-4xl mx-auto space-y-6">
               {cases.map((caseItem) => (
-                <CaseCard
+                <ViewCaseCard
                   key={caseItem._id}
                   title={caseItem.subject || "Untitled Case"}
                   description={caseItem.description || "No description provided."}

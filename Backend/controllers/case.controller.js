@@ -1,6 +1,7 @@
 // controllers/case.controller.js
 import Case from "../models/case.model.js";
 import Notification from "../models/notifications.model.js"; // Fixed typo from your code
+import mongoose from "mongoose"; // For ObjectId validation
 
 const sendResponse = (res, status, success, data, msg) => {
   res.status(status).json({ success, data, msg });
@@ -120,7 +121,6 @@ export const deleteCase = async (req, res) => {
       );
     }
 
-    // Optional: Notify user of deletion
     const notification = new Notification({
       userId: req.user._id,
       userType: "User",
@@ -183,6 +183,65 @@ export const getPendingCasesCount = async (req, res) => {
     sendResponse(res, 200, true, { count }, "Pending cases count retrieved successfully");
   } catch (error) {
     console.error("Error fetching pending cases count:", error.message);
+    sendResponse(res, 500, false, null, `Server error: ${error.message}`);
+  }
+};
+
+// NEW: Get all unassigned cases for lawyers (for ViewCases.jsx)
+export const getAllCases = async (req, res) => {
+  try {
+    console.log("GET /api/case/all - Lawyer:", req.user._id);
+    console.log("Request cookies:", req.cookies);
+
+    const cases = await Case.find({ lawyerId: null });
+    console.log("Unassigned cases found:", cases);
+
+    if (!cases || cases.length === 0) {
+      return sendResponse(res, 200, true, [], "No unassigned cases available");
+    }
+
+    sendResponse(res, 200, true, cases, "Cases fetched successfully");
+  } catch (error) {
+    console.error("Error in getAllCases:", error.message);
+    sendResponse(res, 500, false, null, `Server error: ${error.message}`);
+  }
+};
+
+// NEW: Send offer for a case (for ViewCaseCard.jsx)
+export const sendOffer = async (req, res) => {
+  try {
+    const { caseId } = req.params;
+    console.log("POST /api/case/offer/", caseId, " - Lawyer:", req.user._id);
+
+    if (!mongoose.Types.ObjectId.isValid(caseId)) {
+      return sendResponse(res, 400, false, null, "Invalid case ID");
+    }
+
+    const caseItem = await Case.findById(caseId);
+    if (!caseItem) {
+      return sendResponse(res, 404, false, null, "Case not found");
+    }
+
+    if (caseItem.lawyerId) {
+      return sendResponse(res, 400, false, null, "Case already assigned to a lawyer");
+    }
+
+    caseItem.lawyerId = req.user._id;
+    caseItem.status = "ongoing"; // Update status as needed
+    await caseItem.save();
+
+    const notification = new Notification({
+      userId: caseItem.clientId,
+      userType: "User",
+      message: `A lawyer has sent an offer for your case "${caseItem.subject}".`,
+      createdAt: new Date(),
+      unread: true,
+    });
+    await notification.save();
+
+    sendResponse(res, 200, true, null, "Offer sent to the client!");
+  } catch (error) {
+    console.error("Error in sendOffer:", error.message);
     sendResponse(res, 500, false, null, `Server error: ${error.message}`);
   }
 };
