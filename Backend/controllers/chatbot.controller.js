@@ -1,4 +1,3 @@
-// Backend/controllers/chatbot.controller.js
 import axios from "axios";
 import fs from "fs";
 import path from "path";
@@ -24,7 +23,6 @@ const createDefaultKnowledgeBase = async () => {
     fs.mkdirSync(fileDir, { recursive: true });
   }
   
-  // Only create default file if it doesn't exist
   if (!fs.existsSync(defaultFilePath)) {
     console.log("Creating default knowledge base file...");
     
@@ -114,7 +112,6 @@ const refreshFileContent = async () => {
     
     if (files.length === 0) {
       await createDefaultKnowledgeBase();
-      // Try reading again after creating default
       const retryFiles = fs.readdirSync(fileDir).filter((file) => file.endsWith(".pdf") || file.endsWith(".txt"));
       
       if (retryFiles.length === 0) {
@@ -142,8 +139,6 @@ const refreshFileContent = async () => {
   } catch (error) {
     console.error("Error reading files:", error.message);
     newContent = "Default content: This is a Sri Lankan legal case management platform.";
-    
-    // Try to create default knowledge base if there was an error
     try {
       await createDefaultKnowledgeBase();
     } catch (createError) {
@@ -176,13 +171,11 @@ const chatWithLegalBot = async (req, res) => {
     return res.status(400).json({ success: false, msg: "Message is required" });
   }
 
-  // Ensure knowledge base is fresh
   if (Date.now() - lastRefreshTime > REFRESH_INTERVAL || cachedFileContent.length < 100) {
     try {
       await refreshFileContent();
     } catch (refreshError) {
       console.error("Error refreshing content:", refreshError.message);
-      // Continue with cached content if refresh fails
     }
   }
 
@@ -197,7 +190,7 @@ const chatWithLegalBot = async (req, res) => {
     - Prioritize the knowledge base for all answers, ensuring responses are rooted in its content.
     - Format responses professionally with bullet points ("•") for main points and indented sub-points ("◦") for details.
     - Use "<b>bold</b>" tags to highlight key terms or headings for elegance and clarity.
-    - Echo the user's question in a refined format at the start of the response (e.g., "<b>Your Query:</b> [question]").
+    - Do not include the user's question in the response; provide the answer directly.
     - Do not suggest clients can search for lawyers; lawyers browse and express interest in client-posted cases.
     - Provide actionable, precise advice for legal matters (e.g., accidents, disputes) based on the knowledge base.
     - Only use "I'm Lexi, focused on legal matters..." for questions clearly unrelated to legal issues or the platform (e.g., weather, sports).
@@ -205,7 +198,6 @@ const chatWithLegalBot = async (req, res) => {
   `;
 
   const lowerMessage = message.toLowerCase().trim();
-  const originalMessage = message; // Preserve original casing for echoing
 
   // Minimal Predefined Responses
   if (["hi", "hello", "hey"].includes(lowerMessage)) {
@@ -219,7 +211,6 @@ const chatWithLegalBot = async (req, res) => {
 
   if (lowerMessage === "what can you do") {
     const response = `
-      <b>Your Query:</b> What can you do?<br><br>
       <b>My Capabilities:</b><br>
       • Deliver detailed legal answers from an extensive knowledge base.<br>
       • Assist clients in posting up to 3 Pending cases and tracking their progress with finesse.<br>
@@ -232,7 +223,6 @@ const chatWithLegalBot = async (req, res) => {
 
   if (lowerMessage.includes("how do i find a lawyer")) {
     const response = `
-      <b>Your Query:</b> How do I find a lawyer?<br><br>
       <b>Platform Process:</b><br>
       • This platform operates uniquely—clients don't search for lawyers directly.<br>
       • <b>Step 1:</b> Post your case (up to 3 Pending cases) with details such as issue, district, and case type.<br>
@@ -252,7 +242,7 @@ const chatWithLegalBot = async (req, res) => {
         contents: [
           {
             parts: [
-              { text: `${projectScope}\n\nUser question: ${message}\n\nAnswer directly using the knowledge base as the primary source. Format the response beautifully with bullet points and bold tags, echoing the user's question at the start.` },
+              { text: `${projectScope}\n\nUser question: ${message}\n\nAnswer directly using the knowledge base as the primary source. Format the response beautifully with bullet points and bold tags, without echoing the user's question.` },
             ],
           },
         ],
@@ -261,28 +251,15 @@ const chatWithLegalBot = async (req, res) => {
           maxOutputTokens: 1024,
         },
         safetySettings: [
-          {
-            category: "HARM_CATEGORY_HARASSMENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_HATE_SPEECH",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          },
-          {
-            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold: "BLOCK_MEDIUM_AND_ABOVE"
-          }
-        ]
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
+        ],
       },
       { headers: { "Content-Type": "application/json" } }
     );
 
-    // Handle potential API errors
     if (!response.data?.candidates || response.data.candidates.length === 0) {
       throw new Error("No response from Gemini API");
     }
@@ -299,31 +276,26 @@ const chatWithLegalBot = async (req, res) => {
     // Ensure professional formatting
     reply = reply.replace(/\*\*(.*?)\*\*/g, "<b>$1</b>");
     if (!reply.includes("•") && reply.length > 50) {
-      reply = `<b>Your Query:</b> ${originalMessage}<br><br><b>Response:</b><br>` + 
+      reply = "<b>Response:</b><br>" + 
         reply.split(". ")
           .filter(line => line.trim())
           .map(line => `• ${line.trim()}.`)
           .join("<br>");
-    } else if (!reply.includes("<b>Your Query:</b>")) {
-      reply = `<b>Your Query:</b> ${originalMessage}<br><br><b>Response:</b><br>${reply}`;
+    } else if (!reply.includes("<b>Response:</b>")) {
+      reply = `<b>Response:</b><br>${reply}`;
     }
 
-    // Replace line breaks with <br> for proper HTML rendering
     reply = reply.replace(/\n/g, "<br>");
 
-    // Fallback for unrelated questions
     const legalKeywords = ["law", "case", "platform", "legal", "lawyer", "client", "accident", "injury", "court", "claim", "police", "damage", "penal", "civil", "family", "labour"];
     if (!legalKeywords.some(keyword => lowerMessage.includes(keyword))) {
       reply = `
-        <b>Your Query:</b> ${originalMessage}<br><br>
-        <b>Response:</b><br>
         • I'm Lexi, dedicated to legal matters and this esteemed platform.<br>
         • Your question appears unrelated to legal issues or platform services.<br>
         • <b>How may I assist?</b> Please let me guide you with a case or legal query in a professional manner.
       `;
     }
 
-    // Add a polished closing
     if (!reply.includes("How may I assist") && !reply.includes("Next Step")) {
       reply += "<br><br><b>Next Step:</b> How may I further assist you with this matter?";
     }
@@ -331,8 +303,6 @@ const chatWithLegalBot = async (req, res) => {
     res.status(200).json({ success: true, response: reply });
   } catch (error) {
     console.error("Gemini Error:", error.response?.data || error.message);
-    
-    // Provide a more specific error message for client
     let errorMessage = "Failed to process request";
     if (error.response?.data?.error?.message) {
       errorMessage = `Error: ${error.response.data.error.message}`;
@@ -341,7 +311,7 @@ const chatWithLegalBot = async (req, res) => {
     res.status(500).json({ 
       success: false, 
       msg: errorMessage,
-      response: "<b>Error:</b><br>• Apologies, an issue occurred while processing your request.<br>• Please try again in a moment."
+      response: "• Apologies, an issue occurred while processing your request.<br>• Please try again in a moment."
     });
   }
 };
