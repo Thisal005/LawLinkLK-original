@@ -127,65 +127,45 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
   };
 
   return (
-    <header className="fixed top-0 left-0 lg:left-64 xl:left-72 right-0 bg-gradient-to-r from-blue-700 to-blue-500 h-16 flex items-center justify-between px-4 sm:px-6 shadow-md z-30 rounded-bl-3xl rounded-br-none">
-      <div className="flex items-center">
-        <h1 className="text-lg sm:text-xl font-semibold text-white hidden lg:block">
-          Legal Dashboard
-        </h1>
-      </div>
-      <div className="flex items-center gap-3 sm:gap-6">
-        <div className="flex items-center gap-2 sm:gap-4">
+    <header className="fixed top-0 right-0 w-full md:w-[calc(100%-50rem)] lg:w-[calc(100%-16.5rem)] bg-gradient-to-l from-blue-800 to-blue-600 h-16 flex items-center justify-end px-4 sm:px-6 shadow-sm z-50 md:rounded-tl-full md:rounded-bl-full mt-1">
+      <div className="flex items-center gap-2 sm:gap-5">
+        {/* Action Buttons */}
+        <div className="flex items-center gap-1 sm:gap-3">
           <button
-            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
+            className="p-2 hover:bg-blue-800 rounded-full transition-colors duration-200 flex items-center justify-center"
             aria-label="Calendar"
-            onClick={() => navigate("/calendar")}
+            title="Open Calendar"
+            onClick={() => navigate("/case-history")}
           >
-            <Calendar className="w-5 h-5 text-white" />
-            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              Calendar
-            </span>
-          </button>
-          <button
-            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
-            aria-label="Your Cases"
-            onClick={() => navigate("/cases")}
-          >
+            
             <FileText className="w-5 h-5 text-white" />
-            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              Your Cases
-            </span>
           </button>
           <button
-            className="p-2 hover:bg-blue-600 rounded-full transition-colors duration-200 relative group"
+            className="p-2 hover:bg-blue-800 rounded-full transition-colors duration-200 flex items-center justify-center"
             aria-label="Help"
+            title="Get Help"
             onClick={() => navigate("/help")}
           >
             <HelpCircle className="w-5 h-5 text-white" />
-            <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              Help
-            </span>
           </button>
           <div className="relative" ref={notificationRef}>
             <button
-              className={`p-2 ${notificationsVisible ? "bg-blue-600" : "hover:bg-blue-600"} rounded-full transition-colors duration-200 relative group`}
+              className={`p-2 ${notificationsVisible ? "bg-blue-800" : "hover:bg-blue-800"} rounded-full transition-colors duration-200 flex items-center justify-center relative`}
               onClick={toggleNotifications}
-              aria-label={`Notifications - ${unreadNotifications} unread`}
               aria-expanded={notificationsVisible}
+              title="Notifications"
             >
               <Bell className="w-5 h-5 text-white" />
               {unreadNotifications > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold animate-pulse">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-xs text-white font-bold">
                   {unreadNotifications}
                 </span>
               )}
-              <span className="absolute top-10 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded py-1 px-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                Notifications
-              </span>
             </button>
             {notificationsVisible && (
-              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-hidden border border-gray-200">
-                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-blue-50">
-                  <h3 className="text-lg font-semibold text-blue-700">Notifications</h3>
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-xl z-50 max-h-96 overflow-hidden border border-gray-200 transition-all">
+                <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-800">Notifications</h3>
                   <button
                     className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                     onClick={markAllAsRead}
@@ -238,42 +218,43 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
             )}
           </div>
         </div>
-        <div className="relative pl-3 border-l border-blue-400" ref={userMenuRef}>
+        {/* User Profile */}
+        <div className="relative pl-3 border-l border-blue-500" ref={userMenuRef}>
           <button
-            className="flex items-center gap-2 sm:gap-3 hover:bg-blue-600 rounded-full py-1 px-2 transition-colors duration-200"
+            className="flex items-center gap-3 hover:bg-blue-800 rounded-full py-1 px-2 transition-colors duration-200"
             onClick={toggleUserMenu}
             aria-expanded={userMenuVisible}
             aria-label="User menu"
           >
             <div className="text-right hidden sm:block">
               <div className="font-medium text-white text-sm">{displayName}</div>
-              <div className="text-xs text-blue-200">{practiceAreas}</div>
+              <div className="text-xs text-blue-100">{practiceAreas}</div>
             </div>
             <div className="relative">
               <img
                 src={currentUser?.profilePic || "./images/profilepic.jpg"}
                 alt={`${displayName}'s profile`}
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-blue-200"
+                className="w-8 h-8 rounded-full object-cover ring-2 ring-white"
               />
               <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
             </div>
           </button>
           {userMenuVisible && (
             <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-gray-200">
-              <div className="p-4 border-b border-gray-100 flex items-center gap-3 bg-blue-50">
+              <div className="p-4 border-b border-gray-100 flex items-center gap-3">
                 <img
                   src={currentUser?.profilePic || "./images/profilepic.jpg"}
                   alt={`${displayName}'s profile`}
                   className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
-                  <p className="font-semibold text-blue-700">{displayName}</p>
-                  <p className="text-xs text-gray-600">{practiceAreas}</p>
+                  <p className="font-semibold text-gray-800">{displayName}</p>
+                  <p className="text-xs text-gray-500">{practiceAreas}</p>
                 </div>
               </div>
               <div className="py-1">
                 <button
-                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
+                  className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors duration-200"
                   onClick={() => navigate("/settings")}
                 >
                   <Settings className="w-4 h-4 text-gray-500" />
@@ -282,7 +263,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
               </div>
               <div className="py-1 border-t border-gray-100">
                 <button
-                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors"
+                  className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-gray-50 transition-colors duration-200 flex items-center gap-2"
                   onClick={handleLogout}
                 >
                   <LogOut className="w-4 h-4 text-red-500" />

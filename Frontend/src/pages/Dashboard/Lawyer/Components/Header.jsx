@@ -6,7 +6,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { AppContext } from "../../../../context/AppContext";
 
-const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
+const Header = ({ displayName: propDisplayName, practiceAreas = "Lawyer" }) => {
   const [notificationsVisible, setNotificationsVisible] = useState(false);
   const [userMenuVisible, setUserMenuVisible] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -102,7 +102,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Client" }) => {
       await axios.post(endpoint, {}, { withCredentials: true });
       setIsLoggedIn(false);
       setUserData(null);
-      navigate(lawyerData ? "/lawyer-login" : "/login");
+      navigate(lawyerData ? "/lawyer-login" : "/lawyer-login");
       toast.success("Logged out successfully");
     } catch (error) {
       console.error("Logout error:", error);

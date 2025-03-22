@@ -6,7 +6,8 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Trash2 } from "lucide-react";
+import { Trash2, ArrowLeft, Clock, User, FileText, CheckCircle, AlertCircle } from "lucide-react";
+import { motion } from "framer-motion";
 
 const CaseDetails = () => {
   const { backendUrl, userData } = useContext(AppContext);
@@ -53,7 +54,6 @@ const CaseDetails = () => {
   const handleDelete = async () => {
     setShowConfirm(false);
     try {
-      // Mock API call - replace with real endpoint later
       const response = await axios.delete(`${backendUrl}/api/case/${id}`, {
         withCredentials: true,
       });
@@ -71,16 +71,23 @@ const CaseDetails = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600 text-lg">Loading...</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex h-screen items-center justify-center bg-gray-100"
+      >
+        <p className="text-gray-600 text-lg flex items-center gap-2">
+          <Clock className="w-6 h-6 animate-spin text-blue-500" />
+          Loading...
+        </p>
+      </motion.div>
     );
   }
 
   if (!caseData) return null;
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
       {/* Sidebar */}
       <Sidebar />
 
@@ -90,86 +97,168 @@ const CaseDetails = () => {
         <Header displayName={userData?.fullName || "Client"} practiceAreas="Client" />
 
         {/* Case Details Content */}
-        <div className="flex-1 p-6 mt-16">
-          <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-blue-700">Case Details</h2>
-              <button
-                onClick={() => setShowConfirm(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
-              >
-                <Trash2 className="w-5 h-5" />
-                Delete Case
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm text-gray-600">Subject</label>
-                <p className="text-gray-800 font-medium">{caseData.subject}</p>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex-1 p-6 mt-16 overflow-y-auto"
+        >
+          <div className="max-w-4xl mx-auto">
+            <motion.div
+              className="bg-white rounded-2xl shadow-xl p-8 border border-gray-200"
+              whileHover={{ scale: 1.01 }}
+              transition={{ type: "spring", stiffness: 300 }}
+            >
+              <div className="flex justify-between items-center mb-8">
+                <h2 className="text-3xl font-bold text-blue-700 flex items-center gap-2">
+                  <FileText className="w-8 h-8 text-blue-500" />
+                  Case Details
+                </h2>
+                {caseData.status === "pending" && (
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => setShowConfirm(true)}
+                    className="flex items-center gap-2 px-5 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors shadow-md"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                    Delete Case
+                  </motion.button>
+                )}
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Description</label>
-                <p className="text-gray-800">{caseData.description || "N/A"}</p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Status</label>
-                <p
-                  className={`text-gray-800 font-medium capitalize ${
-                    caseData.status === "ongoing" ? "text-emerald-600" : "text-orange-600"
-                  }`}
+
+              {/* Case Info Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="space-y-4"
                 >
-                  {caseData.status}
-                </p>
+                  <div className="flex items-start gap-3">
+                    <FileText className="w-5 h-5 text-gray-500 mt-1" />
+                    <div>
+                      <label className="text-sm text-gray-500 font-medium">Subject</label>
+                      <p className="text-gray-900 text-lg font-semibold">{caseData.subject}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-gray-500 mt-1" />
+                    <div>
+                      <label className="text-sm text-gray-500 font-medium">Description</label>
+                      <p className="text-gray-700">{caseData.description || "N/A"}</p>
+                    </div>
+                  </div>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <CheckCircle
+                      className={`w-5 h-5 ${
+                        caseData.status === "ongoing" ? "text-emerald-500" : "text-orange-500"
+                      }`}
+                    />
+                    <div>
+                      <label className="text-sm text-gray-500 font-medium">Status</label>
+                      <p
+                        className={`text-lg font-semibold capitalize ${
+                          caseData.status === "ongoing" ? "text-emerald-600" : "text-orange-600"
+                        }`}
+                      >
+                        {caseData.status}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <label className="text-sm text-gray-500 font-medium">Created At</label>
+                      <p className="text-gray-700">
+                        {new Date(caseData.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <User className="w-5 h-5 text-gray-500" />
+                    <div>
+                      <label className="text-sm text-gray-500 font-medium">Assigned Lawyer</label>
+                      <p className="text-gray-700">
+                        {caseData.lawyerId?.fullName || "Not assigned"}
+                      </p>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Created At</label>
-                <p className="text-gray-800">
-                  {new Date(caseData.createdAt).toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Assigned Lawyer</label>
-                <p className="text-gray-800">{caseData.lawyer?.fullName || "Not assigned"}</p>
-              </div>
-            </div>
-            <div className="mt-6">
-              <button
-                onClick={() => navigate("/client-dashboard")}
-                className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors"
+
+              {/* Back Button */}
+              <motion.div
+                className="mt-8"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
               >
-                Back to Dashboard
-              </button>
-            </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate("/client-dashboard")}
+                  className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-md"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                  Back to Dashboard
+                </motion.button>
+              </motion.div>
+            </motion.div>
           </div>
 
           {/* Confirmation Modal */}
           {showConfirm && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-white rounded-xl p-6 max-w-sm w-full shadow-lg">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Are you sure?
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 flex items-center justify-center z-50"
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                transition={{ type: "spring", stiffness: 300 }}
+                className="bg-white rounded-2xl p-8 max-w-md w-full shadow-2xl border border-gray-200"
+              >
+                <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-6 h-6 text-red-500" />
+                  Confirm Deletion
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  Deleting this case ({caseData.subject}) is permanent. Continue?
+                  Are you sure you want to delete <span className="font-semibold">"{caseData.subject}"</span>? This action is permanent.
                 </p>
-                <div className="flex gap-4">
-                  <button
+                <div className="flex gap-4 justify-end">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={handleDelete}
-                    className="px-4 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors"
+                    className="px-5 py-2 bg-red-600 text-white rounded-full hover:bg-red-700 transition-colors shadow-md"
                   >
                     Yes, Delete
-                  </button>
-                  <button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => setShowConfirm(false)}
-                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                    className="px-5 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors shadow-md"
                   >
                     Cancel
-                  </button>
+                  </motion.button>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );
