@@ -32,7 +32,7 @@ import CaseHistory from "./pages/Dashboard/Client/Components/CaseHistory";
 import Chatbot from "./pages/Dashboard/Client/Components/Chatbot";
 import LawyerDashboard from "./pages/Dashboard/Lawyer/LawyerDashboard";
 import LawyerAccountSettings from "./pages/Dashboard/Lawyer/Components/LawyerAccountSettings";
-import Case from "./pages/Dashboard/Lawyer/Components/Case";
+import LawyerCase from "./pages/Dashboard/Lawyer/Components/Case";
 import ViewCases from "./pages/Dashboard/Lawyer/Components/ViewCases";
 import CalendarReminders from "./pages/Dashboard/Lawyer/Components/CalendarReminders";
 
@@ -179,7 +179,7 @@ const App = () => {
                     path="/lawyer-case/:caseId"
                     element={
                       <ProtectedRoute>
-                        <Case />
+                        <LawyerCase />
                       </ProtectedRoute>
                     }
                   />

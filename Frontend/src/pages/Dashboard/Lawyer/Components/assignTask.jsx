@@ -1,7 +1,7 @@
 // components/TaskForm.jsx
 import React, { useState } from "react";
-import useCreateTask from "../../../hooks/useCreateTask";
-import useFetchAssignedTasks from "../../../hooks/useFetchAssignedTask";
+import useCreateTask from "../../../../hooks/useCreateTask";
+import useFetchAssignedTasks from "../../../../hooks/useFetchAssignedTask";
 import LawyerTaskCard from "./LawyerTaskCard";
 
 const TaskForm = ({ caseId, clientId }) => {
