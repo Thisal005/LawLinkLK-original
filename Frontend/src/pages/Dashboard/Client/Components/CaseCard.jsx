@@ -1,9 +1,10 @@
+// frontend/src/CaseCard.jsx
 import React, { useState, useEffect, useContext } from "react";
-import useFetchCase from "../../../../hooks/useFetchCase";
+import useFetchCase from "../../../../hooks/useFetchCase"; // Adjust path as needed
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { AppContext } from "../../../../context/AppContext";
+import { AppContext } from "../../../../context/AppContext"; // Adjust path as needed
 
 const CaseCard = ({ caseId }) => {
   const { caseData, loading } = useFetchCase(caseId);
@@ -58,7 +59,7 @@ const CaseCard = ({ caseId }) => {
       );
       if (response.data.success) {
         setOffers((prev) => prev.filter((o) => o.lawyerId !== lawyerId));
-        toast.success("Offer accepted!");
+        toast.success("Lawyer assigned to your case!");
         window.location.reload(); // Refetch case data
       }
     } catch (error) {
@@ -216,8 +217,13 @@ const CaseCard = ({ caseId }) => {
           ) : offers.length > 0 ? (
             <ul className="space-y-2">
               {offers.map((offer) => (
-                <li key={offer.notificationId} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-800">{offer.message}</span>
+                <li
+                  key={offer.notificationId}
+                  className="flex items-center justify-between"
+                >
+                  <span className="text-sm text-gray-800">
+                    A lawyer has expressed interest in your case. Would you like to accept?
+                  </span>
                   <div className="flex gap-2">
                     <button
                       onClick={(e) => {
@@ -226,7 +232,7 @@ const CaseCard = ({ caseId }) => {
                       }}
                       className="bg-green-500 hover:bg-green-600 text-white text-xs font-semibold py-1 px-2 rounded transition-all"
                     >
-                      Accept
+                      Yes
                     </button>
                     <button
                       onClick={(e) => {
@@ -235,7 +241,7 @@ const CaseCard = ({ caseId }) => {
                       }}
                       className="bg-red-500 hover:bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded transition-all"
                     >
-                      Reject
+                      No
                     </button>
                   </div>
                 </li>

@@ -14,6 +14,7 @@ const Chatbot = () => {
   const [showChatSidebar, setShowChatSidebar] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const chatContainerRef = useRef(null); // Ref for the chat container
 
   const AI_NAME = "Lexi";
   const MESSAGE_LIMIT = 20;
@@ -26,6 +27,22 @@ const Chatbot = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        showChatSidebar &&
+        chatContainerRef.current &&
+        !chatContainerRef.current.contains(event.target)
+      ) {
+        setShowChatSidebar(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showChatSidebar]);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -116,7 +133,10 @@ const Chatbot = () => {
           practiceAreas={lawyerData ? "Legal Assistance" : "Client"}
         />
         <div className="flex-1 flex items-center justify-center p-4 mt-16">
-          <div className="w-full max-w-5xl bg-white rounded-xl shadow-md h-[85vh] relative overflow-hidden transition-all duration-300 border border-slate-200">
+          <div
+            ref={chatContainerRef} // Attach ref to the chat container
+            className="w-full max-w-5xl bg-white rounded-xl shadow-md h-[85vh] relative overflow-hidden transition-all duration-300 border border-slate-200"
+          >
             {/* Main Chat Area */}
             <div className="flex flex-col h-full">
               {/* Toggle Sidebar Button */}
@@ -171,7 +191,7 @@ const Chatbot = () => {
                         className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"} mb-4`}
                       >
                         <div
-                          className={`max-w-md p-4 rounded-lg ${
+                          className={`max-w-2x1 p-4 rounded-lg ${
                             msg.sender === "user"
                               ? "bg-slate-800 text-white"
                               : "bg-slate-100 text-slate-800"

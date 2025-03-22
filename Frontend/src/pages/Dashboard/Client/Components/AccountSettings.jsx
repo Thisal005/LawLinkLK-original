@@ -1,60 +1,98 @@
-// frontend/src/AccountSettings.jsx
+// frontend/src/ClientAccountSettings.jsx
 import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "../../../../context/AppContext";
+import { AppContext } from "../../../../context/AppContext"; // Adjust path as needed
 import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { Upload, X } from 'lucide-react';
+import Sidebar from "./Sidebar"; // Adjust path as needed
+import Header from "./Header";   // Adjust path as needed
 
-const AccountSettings = () => {
+const ClientAccountSettings = () => {
   const { backendUrl, userData, setUserData } = useContext(AppContext);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     contact: "",
-    profilePic: null,
+    province: "",
+    profilePicture: null,
+    receiveNotifications: false,
+    receiveEmailNotifications: false,
   });
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+  const [tempProfilePicture, setTempProfilePicture] = useState(null);
 
+  // Sri Lanka's 9 provinces
+  const provinces = [
+    "Central",
+    "Eastern",
+    "North Central",
+    "Northern",
+    "North Western",
+    "Sabaragamuwa",
+    "Southern",
+    "Uva",
+    "Western",
+  ];
+
+  // Initialize form data from userData
   useEffect(() => {
     if (!userData?._id) {
       toast.error("Please log in to edit your settings.");
-      navigate("/lawyer-login");
+      navigate("/client-login"); // Adjust route as needed
     } else {
       setFormData({
         fullName: userData.fullName || "",
         email: userData.email || "",
         contact: userData.contact || "",
-        profilePic: null,
+        province: userData.province || "",
+        profilePicture: null,
+        receiveNotifications: userData.receiveNotifications || false,
+        receiveEmailNotifications: userData.receiveEmailNotifications || false,
       });
-      setPhotoPreview(userData.profilePic || "./images/profilepic.jpg");
+      setTempProfilePicture(userData.profilePicture || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
       setLoading(false);
     }
   }, [userData, navigate]);
 
+  // Handle input changes
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "profilePic" && files[0]) {
-      setFormData((prev) => ({ ...prev, profilePic: files[0] }));
-      setPhotoPreview(URL.createObjectURL(files[0]));
+    const { name, value, files, type, checked } = e.target;
+    if (name === "profilePicture" && files[0]) {
+      setFormData((prev) => ({ ...prev, profilePicture: files[0] }));
+      const reader = new FileReader();
+      reader.onload = (e) => setTempProfilePicture(e.target.result);
+      reader.readAsDataURL(files[0]);
+    } else if (type === "checkbox") {
+      setFormData((prev) => ({ ...prev, [name]: checked }));
+      toast.info(`${name === "receiveNotifications" ? "Notification" : "Email notification"} preference updated.`, {
+        position: "top-right",
+        autoClose: 2000,
+      });
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
+  // Remove profile picture
+  const handleRemovePhoto = () => {
+    setTempProfilePicture("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
+    setFormData((prev) => ({ ...prev, profilePicture: null }));
+  };
+
+  // Submit form to backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
 
     const formDataToSend = new FormData();
-    formDataToSend.append("fullName", formData.fullName);
-    formDataToSend.append("contact", formData.contact);
-    if (formData.profilePic) {
-      formDataToSend.append("profilePic", formData.profilePic);
+    formDataToSend.append("province", formData.province);
+    formDataToSend.append("receiveNotifications", formData.receiveNotifications);
+    formDataToSend.append("receiveEmailNotifications", formData.receiveEmailNotifications);
+    if (formData.profilePicture) {
+      formDataToSend.append("profilePicture", formData.profilePicture);
     }
 
     try {
@@ -64,8 +102,8 @@ const AccountSettings = () => {
       });
       if (response.data.success) {
         setUserData(response.data.userData);
-        toast.success("Account updated successfully!");
-        navigate("/client-dashboard");
+        toast.success("Profile updated successfully!");
+        navigate("/client-dashboard"); // Adjust route as needed
       } else {
         toast.error(response.data.message || "Update failed.");
       }
@@ -79,8 +117,8 @@ const AccountSettings = () => {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600 text-lg">Loading...</p>
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <p className="text-gray-600 text-lg font-medium">Loading...</p>
       </div>
     );
   }
@@ -88,77 +126,141 @@ const AccountSettings = () => {
   const displayName = userData?.fullName || "Client";
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col lg:ml-64 xl:ml-72">
         <Header displayName={displayName} practiceAreas="Client" />
-        <div className="flex-1 p-6 mt-16">
-          <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6">Account Settings</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex items-center gap-4 mb-4">
-                <img
-                  src={photoPreview}
-                  alt="Profile preview"
-                  className="w-16 h-16 rounded-full object-cover ring-2 ring-blue-200"
+        <div className="flex-1 p-6 mt-16 overflow-y-auto">
+          <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Profile Settings</h2>
+            <p className="text-sm text-gray-600 mb-6">
+              For your security, certain details are locked. Contact support to modify them.
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Profile Picture */}
+              <div className="flex items-center gap-6">
+                <img 
+                  src={tempProfilePicture}
+                  alt="Profile"
+                  className="w-24 h-24 rounded-full object-cover ring-2 ring-gray-200"
                 />
-                <div>
-                  <label className="text-sm text-gray-600">Profile Picture</label>
+                <div className="space-y-2">
                   <input
                     type="file"
-                    name="profilePic"
+                    id="profile-picture-upload"
+                    name="profilePicture"
                     accept="image/*"
+                    style={{ display: 'none' }}
                     onChange={handleChange}
-                    className="mt-1"
                   />
+                  <label
+                    htmlFor="profile-picture-upload"
+                    className="px-3 py-1 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors inline-flex items-center gap-2 cursor-pointer text-sm"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload Photo
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleRemovePhoto}
+                    className="px-3 py-1 text-gray-600 hover:text-gray-800 transition-colors text-sm"
+                  >
+                    Remove
+                  </button>
                 </div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                />
+
+              {/* Form Fields */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                  <input 
+                    type="text"
+                    name="fullName"
+                    value={formData.fullName}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input 
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                  <input 
+                    type="tel"
+                    name="contact"
+                    value={formData.contact}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500 cursor-not-allowed"
+                    disabled
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Province</label>
+                  <select
+                    name="province"
+                    value={formData.province}
+                    onChange={handleChange}
+                    className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                  >
+                    <option value="">Select Province</option>
+                    {provinces.map((province) => (
+                      <option key={province} value={province}>
+                        {province}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                  disabled
-                />
+
+              {/* Notification Checkboxes */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="receiveNotifications"
+                    checked={formData.receiveNotifications}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  Receive Notifications
+                </label>
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="receiveEmailNotifications"
+                    checked={formData.receiveEmailNotifications}
+                    onChange={handleChange}
+                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                  />
+                  Receive Notifications via Email
+                </label>
               </div>
-              <div>
-                <label className="text-sm text-gray-600">Contact</label>
-                <input
-                  type="text"
-                  name="contact"
-                  value={formData.contact}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="e.g., +94 123 456 789"
-                />
-              </div>
-              <div className="flex gap-4">
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                  className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-gray-400 transition-colors text-sm font-medium"
                 >
                   {submitting ? "Saving..." : "Save Changes"}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/client-dashboard")}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors text-sm font-medium"
                 >
                   Cancel
                 </button>
@@ -171,4 +273,4 @@ const AccountSettings = () => {
   );
 };
 
-export default AccountSettings;
+export default ClientAccountSettings;

@@ -120,6 +120,14 @@ const App = () => {
                     }
                   />
                   <Route
+                    path="/lawyer-settings"
+                    element={
+                      <ProtectedRoute>
+                        <LawyerAccountSettings />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/case-history"
                     element={
                       <ProtectedRoute>

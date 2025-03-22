@@ -275,7 +275,7 @@ const Header = ({ displayName: propDisplayName, practiceAreas = "Lawyer" }) => {
               <div className="py-1">
                 <button
                   className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-blue-50 flex items-center gap-2 transition-colors"
-                  onClick={() => navigate("/settings")}
+                  onClick={() => navigate("/lawyer-settings")}
                 >
                   <Settings className="w-4 h-4 text-gray-500" />
                   <span>Account Settings</span>

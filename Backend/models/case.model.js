@@ -20,12 +20,27 @@ const caseSchema = new mongoose.Schema({
   caseType: {
     type: String,
     required: [true, "Case type is required"],
-    enum: ["criminal", "civil", "family"],
+    enum: [
+      "criminal", "civil", "family",
+      "theft-and-burglary", "drug-offenses", "personal-injury",
+      "divorce", "employment-law", "contract-disputes", "immigration",
+      "other"
+    ],
   },
   district: {
     type: String,
     required: [true, "District is required"],
-    enum: ["colombo", "gampaha", "kandy"],
+    enum: [
+      "colombo", "gampaha", "kalutara",
+      "kandy", "matale", "nuwara eliya",
+      "galle", "matara", "hambantota",
+      "jaffna", "kilinochchi", "mannar", "vavuniya", "mullaitivu",
+      "batticaloa", "ampara", "trincomalee",
+      "kurunegala", "puttalam",
+      "anuradhapura", "polonnaruwa",
+      "badulla", "monaragala",
+      "ratnapura", "kegalle"
+    ],
   },
   courtDate: {
     type: Date,
@@ -44,10 +59,6 @@ const caseSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now,
-  },
-  expiresAt: {
-    type: Date,
-    default: () => new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), // 14 days from creation
   },
 });
 

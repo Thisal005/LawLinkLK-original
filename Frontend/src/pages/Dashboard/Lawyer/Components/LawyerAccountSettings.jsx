@@ -1,174 +1,193 @@
-// frontend/src/pages/Dashboard/Lawyer/Components/LawyerAccountSettings.jsx
-import React, { useContext, useEffect, useState } from "react";
-import { AppContext } from "../../../../context/AppContext";
-import { useNavigate } from "react-router-dom";
-import Sidebar from "./Sidebar";
-import Header from "./Header";
-import axios from "axios";
-import { toast } from "react-toastify";
+import React, { useState } from 'react';
+import { Upload, X } from 'lucide-react';
 
-const LawyerAccountSettings = () => {
-  const { backendUrl, lawyerData, setLawyerData } = useContext(AppContext);
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    contact: "",
-    profilePic: null,
-  });
-  const [photoPreview, setPhotoPreview] = useState(null);
-  const [submitting, setSubmitting] = useState(false);
+const ProfileSettings = ({ profilePicture, displayName, practiceAreas, onSave }) => {
+  const [tempProfilePicture, setTempProfilePicture] = useState(profilePicture);
+  const [tempDisplayName, setTempDisplayName] = useState(displayName);
+  const [tempPracticeAreas, setTempPracticeAreas] = useState(practiceAreas);
+  const [qualificationPhotos, setQualificationPhotos] = useState([]);
 
-  useEffect(() => {
-    if (!lawyerData?._id) {
-      toast.error("Please log in to edit your settings.");
-      navigate("/lawyer-login");
-    } else {
-      setFormData({
-        fullName: lawyerData.fullName || "",
-        email: lawyerData.email || "",
-        contact: lawyerData.contact || "",
-        profilePic: null,
-      });
-      setPhotoPreview(lawyerData.profilePic || "./images/profilepic.jpg");
-      setLoading(false);
-    }
-  }, [lawyerData, navigate]);
-
-  const handleChange = (e) => {
-    const { name, value, files } = e.target;
-    if (name === "profilePic" && files[0]) {
-      setFormData((prev) => ({ ...prev, profilePic: files[0] }));
-      setPhotoPreview(URL.createObjectURL(files[0]));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setTempProfilePicture(e.target.result);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
+  const handleRemovePhoto = () => {
+    setTempProfilePicture("https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png");
+  };
 
-    const formDataToSend = new FormData();
-    formDataToSend.append("fullName", formData.fullName);
-    formDataToSend.append("contact", formData.contact);
-    if (formData.profilePic) {
-      formDataToSend.append("profilePic", formData.profilePic);
-    }
-
-    try {
-      const response = await axios.put(`${backendUrl}/api/user/update`, formDataToSend, {
-        withCredentials: true,
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      if (response.data.success) {
-        setLawyerData(response.data.userData);
-        toast.success("Account updated successfully!");
-        navigate("/lawyer-dashboard");
-      } else {
-        toast.error(response.data.message || "Update failed.");
-      }
-    } catch (error) {
-      console.error("Update error:", error.response?.data || error.message);
-      toast.error(error.response?.data?.message || "Something went wrong.");
-    } finally {
-      setSubmitting(false);
+  const handleQualificationPhotoUpload = (event) => {
+    const files = event.target.files;
+    if (files) {
+      const newPhotos = Array.from(files).map(file => URL.createObjectURL(file));
+      setQualificationPhotos([...qualificationPhotos, ...newPhotos]);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-100">
-        <p className="text-gray-600 text-lg">Loading...</p>
-      </div>
-    );
-  }
+  const handleRemoveQualificationPhoto = (index) => {
+    const updatedPhotos = qualificationPhotos.filter((_, i) => i !== index);
+    setQualificationPhotos(updatedPhotos);
+  };
 
-  const displayName = lawyerData?.fullName || "Counselor";
+  const handleSaveChanges = () => {
+    onSave({
+      profilePicture: tempProfilePicture,
+      displayName: tempDisplayName,
+      practiceAreas: tempPracticeAreas,
+    });
+  };
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
-      <Sidebar />
-      <div className="flex-1 flex flex-col lg:ml-64 xl:ml-72">
-        <Header displayName={displayName} practiceAreas={lawyerData?.practiceAreas || "Lawyer"} />
-        <div className="flex-1 p-6 mt-16">
-          <div className="max-w-2xl mx-auto bg-white rounded-xl shadow-md p-6">
-            <h2 className="text-2xl font-bold text-blue-700 mb-6">Account Settings</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex items-center gap-4 mb-4">
-                <img
-                  src={photoPreview}
-                  alt="Profile preview"
-                  className="w-16 h-16 rounded-full object-cover ring-2 ring-blue-200"
-                />
-                <div>
-                  <label className="text-sm text-gray-600">Profile Picture</label>
-                  <input
-                    type="file"
-                    name="profilePic"
-                    accept="image/*"
-                    onChange={handleChange}
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Full Name</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  value={formData.fullName}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Email</label>
-                <input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  required
-                  disabled
-                />
-              </div>
-              <div>
-                <label className="text-sm text-gray-600">Contact</label>
-                <input
-                  type="text"
-                  name="contact"
-                  value={formData.contact}
-                  onChange={handleChange}
-                  className="w-full p-2 border border-blue-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  placeholder="e.g., +94 123 456 789"
-                />
-              </div>
-              <div className="flex gap-4">
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
-                >
-                  {submitting ? "Saving..." : "Save Changes"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => navigate("/lawyer-dashboard")}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
+    <div className="p-7">
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-xl font-semibold text-gray-600">Account Settings</h1>
+          <hr /><br />
+          <div className="flex items-center gap-6">
+            <img 
+              src={tempProfilePicture}
+              alt="Profile"
+              className="w-32 h-32 rounded-full object-cover ring-4 ring-gray-100"
+            />
+            <div className="space-y-2">
+              <input
+                type="file"
+                id="profile-picture-upload"
+                accept="image/*"
+                style={{ display: 'none' }}
+                onChange={handleFileChange}
+              />
+              <label
+                htmlFor="profile-picture-upload"
+                className="px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Upload className="w-4 h-4" />
+                Upload new photo
+              </label>
+              <button
+                onClick={handleRemovePhoto}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors block text-sm"
+              >
+                Remove photo
+              </button>
+            </div>
           </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Display Name</label>
+            <input 
+              type="text"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="How clients will see you"
+              value={tempDisplayName}
+              onChange={(e) => setTempDisplayName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+            <input 
+              type="text"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Your legal name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+            <input 
+              type="email"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="your@email.com"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Contact Number</label>
+            <input 
+              type="tel"
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="+94 XX XXX XXXX"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Languages Known</label>
+            <input 
+              type="tel"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Languages you can communicate in"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Practice Courts</label>
+            <input 
+              type="tel"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Enter the courts you practice in"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Qualifications</label>
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleQualificationPhotoUpload}
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+            />
+            <div className="mt-4 grid grid-cols-3 gap-4">
+              {qualificationPhotos.map((photo, index) => (
+                <div key={index} className="relative">
+                  <img
+                    src={photo}
+                    alt={`Qualification ${index + 1}`}
+                    className="w-full h-24 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => handleRemoveQualificationPhoto(index)}
+                    className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Specialization</label>
+            <input 
+              type="text"
+              className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="e.g., Criminal Law, Corporate Law"
+              value={tempPracticeAreas}
+              onChange={(e) => setTempPracticeAreas(e.target.value)}
+            />
+          </div>
+          <div className="col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Professional Biography</label>
+            <textarea 
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors h-32"
+              placeholder="Tell clients about your experience and expertise..."
+            ></textarea>
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-4">
+          <button
+            onClick={handleSaveChanges}
+            className="px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+          >
+            Save Changes
+          </button>
         </div>
       </div>
     </div>
   );
 };
 
-export default LawyerAccountSettings;
+export default ProfileSettings;

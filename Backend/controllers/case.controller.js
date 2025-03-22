@@ -7,7 +7,7 @@ const sendResponse = (res, status, success, data, msg) => {
   res.status(status).json({ success, data, msg });
 };
 
-// Existing createCase (tweaked for consistency)
+// Existing createCase (unchanged)
 export const createCase = async (req, res) => {
   try {
     console.log("Create case - req.user:", req.user);
@@ -66,7 +66,7 @@ export const createCase = async (req, res) => {
   }
 };
 
-// Get case details by ID (for CaseDetails.jsx)
+// Get case details by ID (unchanged)
 export const getCaseDetails = async (req, res) => {
   try {
     const { caseId } = req.params;
@@ -97,7 +97,7 @@ export const getCaseDetails = async (req, res) => {
   }
 };
 
-// Delete case by ID (for CaseDetails.jsx)
+// Delete case by ID (fixed syntax error and aligned with frontend)
 export const deleteCase = async (req, res) => {
   try {
     const { caseId } = req.params;
@@ -106,10 +106,8 @@ export const deleteCase = async (req, res) => {
       return sendResponse(res, 400, false, null, "Invalid case ID");
     }
 
-    const caseData = await Case.findOneAndDelete({
-      _id: caseId,
-      clientId: req.user._id,
-    });
+    // Find the case first to check conditions
+    const caseData = await Case.findById(caseId);
 
     if (!caseData) {
       return sendResponse(
@@ -117,11 +115,35 @@ export const deleteCase = async (req, res) => {
         404,
         false,
         null,
-        "Case not found or you are not authorized to delete it"
+        "Case not found"
       );
     }
 
-    const notification = new Notification({
+    if (caseData.clientId.toString() !== req.user._id.toString()) {
+      return sendResponse(
+        res,
+        403,
+        false,
+        null,
+        "You are not authorized to delete this case"
+      );
+    }
+
+    // Check if case is pending and has no lawyer (matches CaseDetails.jsx canDeleteCase)
+    if (caseData.status !== "pending" || caseData.lawyerId) {
+      return sendResponse(
+        res,
+        400,
+        false,
+        null,
+        "Cannot delete case: It’s either not pending or already assigned to a lawyer"
+      );
+    }
+
+    // Delete the case
+    await Case.findOneAndDelete({ _id: caseId, clientId: req.user._id });
+
+    const notification = new Notification({ // Fixed syntax: removed extra dot
       userId: req.user._id,
       userType: "User",
       message: `Your case "${caseData.subject}" has been deleted.`,
@@ -137,7 +159,7 @@ export const deleteCase = async (req, res) => {
   }
 };
 
-// Existing endpoints from your Sidebar (for completeness)
+// Existing endpoints from your Sidebar (unchanged)
 export const getUserCases = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -187,7 +209,7 @@ export const getPendingCasesCount = async (req, res) => {
   }
 };
 
-// NEW: Get all unassigned cases for lawyers (for ViewCases.jsx)
+// NEW: Get all unassigned cases for lawyers (unchanged)
 export const getAllCases = async (req, res) => {
   try {
     console.log("GET /api/case/all - Lawyer:", req.user._id);
@@ -207,7 +229,7 @@ export const getAllCases = async (req, res) => {
   }
 };
 
-// NEW: Send offer for a case (for ViewCaseCard.jsx)
+// NEW: Send offer for a case (unchanged)
 export const sendOffer = async (req, res) => {
   try {
     const { caseId } = req.params;

@@ -282,7 +282,7 @@ const chatWithLegalBot = async (req, res) => {
           .map(line => `• ${line.trim()}.`)
           .join("<br>");
     } else if (!reply.includes("<b>Response:</b>")) {
-      reply = `<b>Response:</b><br>${reply}`;
+      reply = `<b>${reply}`;
     }
 
     reply = reply.replace(/\n/g, "<br>");

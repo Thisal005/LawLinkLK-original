@@ -1,11 +1,12 @@
 // routes/case.route.js
 import express from "express";
 import Case from "../models/case.model.js";
-import Notification from "../models/notifications.model.js"; // Corrected to singular
+import Notification from "../models/notifications.model.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 import {
   createCase,
   getCaseDetails,
+  deleteCase, // Added import
   getUserCases,
   getAllCases,
   sendOffer,
@@ -18,15 +19,17 @@ const sendResponse = (res, status, success, data, msg) => {
   res.status(status).json({ success, data, msg });
 };
 
-// NEW: Get all unassigned cases for lawyers (moved up to avoid param conflict)
+// NEW: Get all unassigned cases for lawyers
 caseRouter.get("/all", protectRoute, getAllCases);
 
-// NEW: Send offer for a case (moved up with /all)
+// NEW: Send offer for a case
 caseRouter.post("/offer/:caseId", protectRoute, sendOffer);
 
 caseRouter.post("/create-case", protectRoute, createCase);
 
 caseRouter.get("/:caseId", protectRoute, getCaseDetails);
+
+caseRouter.delete("/:caseId", protectRoute, deleteCase); // Added DELETE route
 
 caseRouter.get("/user/:userId", protectRoute, getUserCases);
 
@@ -108,7 +111,7 @@ caseRouter.post("/lawyer/notifications/mark-all-read", protectRoute, async (req,
   }
 });
 
-// Completed: Get case participants (stub filled in)
+// Completed: Get case participants
 caseRouter.get("/:caseId/participants", protectRoute, async (req, res) => {
   try {
     console.log("Get case participants - req.user:", req.user);
@@ -126,7 +129,6 @@ caseRouter.get("/:caseId/participants", protectRoute, async (req, res) => {
       return sendResponse(res, 404, false, null, "Case not found");
     }
 
-    // Check if user is either the client or lawyer
     const isClient = caseData.clientId._id.toString() === req.user._id.toString();
     const isLawyer = caseData.lawyerId?._id.toString() === req.user._id.toString();
 
