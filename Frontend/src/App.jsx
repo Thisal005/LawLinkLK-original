@@ -120,7 +120,7 @@ const App = () => {
                     }
                   />
                   <Route
-                    path="/cases"
+                    path="/case-history"
                     element={
                       <ProtectedRoute>
                         <CaseHistory />

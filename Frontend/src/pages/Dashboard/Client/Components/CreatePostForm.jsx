@@ -11,7 +11,12 @@ import {
   AlertCircle, 
   CheckCircle, 
   Send, 
-  Sparkles 
+  Clock,
+  Info,
+  Shield,
+  Book,
+  HelpCircle,
+  AlertTriangle
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "react-toastify";
@@ -32,6 +37,64 @@ function PostCaseForm() {
   const [loading, setLoading] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [pendingCasesCount, setPendingCasesCount] = useState(0);
+  const [showTips, setShowTips] = useState(true);
+
+  // Case types data with categories
+  const caseTypes = {
+    "Criminal Law": [
+      "Criminal Defense",
+      "Drug Offenses",
+      "DUI/DWI",
+      "White Collar Crimes",
+      "Assault & Battery",
+      "Theft & Burglary"
+    ],
+    "Civil Law": [
+      "Contract Disputes",
+      "Property Law",
+      "Personal Injury",
+      "Medical Malpractice",
+      "Professional Negligence",
+      "Defamation"
+    ],
+    "Family Law": [
+      "Divorce",
+      "Child Custody",
+      "Adoption",
+      "Domestic Violence",
+      "Child Support",
+      "Alimony"
+    ],
+    "Corporate Law": [
+      "Business Formation",
+      "Mergers & Acquisitions",
+      "Corporate Governance",
+      "Securities Law",
+      "Intellectual Property",
+      "Employment Law"
+    ],
+    "Other Areas": [
+      "Immigration",
+      "Tax Law",
+      "Bankruptcy",
+      "Environmental Law",
+      "Estate Planning",
+      "Administrative Law"
+    ]
+  };
+
+  // Districts by region
+  const districts = {
+    "Western Province": ["Colombo", "Gampaha", "Kalutara"],
+    "Central Province": ["Kandy", "Matale", "Nuwara Eliya"],
+    "Southern Province": ["Galle", "Matara", "Hambantota"],
+    "Northern Province": ["Jaffna", "Kilinochchi", "Mannar", "Vavuniya", "Mullaitivu"],
+    "Eastern Province": ["Batticaloa", "Ampara", "Trincomalee"],
+    "North Western Province": ["Kurunegala", "Puttalam"],
+    "North Central Province": ["Anuradhapura", "Polonnaruwa"],
+    "Uva Province": ["Badulla", "Monaragala"],
+    "Sabaragamuwa Province": ["Ratnapura", "Kegalle"]
+  };
 
   useEffect(() => {
     const fetchPendingCases = async () => {
@@ -75,8 +138,8 @@ function PostCaseForm() {
       return;
     }
     if (pendingCasesCount >= 3) {
-      setError("You’ve reached your limit of 3 pending cases!");
-      toast.error("You’ve reached your limit of 3 pending cases!");
+      setError("You've reached your limit of 3 pending cases!");
+      toast.error("You've reached your limit of 3 pending cases!");
       return;
     }
 
@@ -117,42 +180,132 @@ function PostCaseForm() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 overflow-hidden">
+    <div className="flex min-h-screen bg-slate-50 overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex flex-col lg:ml-64 xl:ml-72">
         <Header displayName={userData?.fullName || "Client"} practiceAreas="Client" />
-        <main className="flex-1 flex items-center justify-center p-6 sm:p-8 lg:p-10 pt-20 lg:pt-24">
+        
+        <main className="flex-1 flex items-start justify-center p-4 md:p-8 pt-20 lg:pt-24 pb-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="bg-white rounded-3xl shadow-2xl p-8 sm:p-10 w-full max-w-4xl border border-indigo-100 bg-gradient-to-b from-white to-indigo-50 relative overflow-hidden"
+            className="bg-white rounded-xl shadow-lg p-6 md:p-8 w-full max-w-4xl border border-slate-200 relative"
           >
-            {/* Decorative Sparkles */}
-            <motion.div
-              className="absolute top-0 right-0 w-20 h-20 text-indigo-200"
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-              <Sparkles className="w-full h-full opacity-30" />
-            </motion.div>
+            {/* Accent corner */}
+            <div className="absolute top-0 right-0 w-32 h-32 overflow-hidden">
+              <div className="absolute top-0 right-0 bg-gradient-to-br from-blue-500 to-blue-600 rotate-45 transform origin-bottom-left w-12 h-64"></div>
+            </div>
 
-            <h2 className="text-3xl sm:text-4xl font-bold text-indigo-800 text-center mb-6 flex items-center justify-center gap-3 tracking-tight">
-              <Briefcase className="w-9 h-9 text-indigo-500 animate-[pulse_2s_infinite]" />
-              Post a Case Anonymously
-            </h2>
-            <p className="text-base text-gray-600 text-center mb-8 tracking-wide">
-              Share your legal matter discreetly—avoid sensitive or personal details.
-            </p>
+            {/* Header section */}
+            <div className="mb-8 relative z-10">
+              <div className="inline-flex items-center justify-center p-2 bg-blue-50 rounded-full mb-3">
+                <Shield className="w-5 h-5 text-blue-600" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-800 mb-2">
+                Post a Case Anonymously
+              </h2>
+              <p className="text-slate-500 text-sm md:text-base max-w-2xl">
+                Share your legal matter discreetly while connecting with qualified attorneys. 
+                All case information remains anonymous until you choose to engage with a legal professional.
+              </p>
+            </div>
 
+            {/* Prominent Case Limit Banner */}
+            <div className={`mb-6 p-4 rounded-lg border ${pendingCasesCount >= 3 ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+              <div className="flex items-center gap-3">
+                <div className={`p-2 rounded-full ${pendingCasesCount >= 3 ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+                  {pendingCasesCount >= 3 ? 
+                    <AlertTriangle className="w-5 h-5" /> : 
+                    <Info className="w-5 h-5" />
+                  }
+                </div>
+                <div>
+                  <h3 className={`text-sm font-semibold ${pendingCasesCount >= 3 ? 'text-red-700' : 'text-amber-700'}`}>
+                    {pendingCasesCount >= 3 ? 'Case Limit Reached' : 'Case Limit Information'}
+                  </h3>
+                  <p className={`text-xs mt-1 ${pendingCasesCount >= 3 ? 'text-red-600' : 'text-amber-600'}`}>
+                    {pendingCasesCount >= 3 
+                      ? 'You have reached your maximum of 3 pending cases. Please wait for attorneys to respond or close existing cases before posting a new one.' 
+                      : `You currently have ${pendingCasesCount}/3 pending cases. Each client is limited to 3 pending cases at a time.`
+                    }
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Key Info Indicators */}
+            <div className="mb-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="px-4 py-3 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-3">
+                <Calendar className="text-blue-500 w-5 h-5 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  <span className="font-semibold">14-day</span> active posting
+                </span>
+              </div>
+              
+              <div className="px-4 py-3 bg-green-50 border border-green-100 rounded-lg flex items-center gap-3">
+                <CheckCircle className="text-green-500 w-5 h-5 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  <span className="font-semibold">You</span> choose the attorney
+                </span>
+              </div>
+              
+              <div className="px-4 py-3 bg-amber-50 border border-amber-100 rounded-lg flex items-center gap-3">
+                <Shield className="text-amber-500 w-5 h-5 flex-shrink-0" />
+                <span className="text-sm text-slate-700">
+                  <span className="font-semibold">100%</span> anonymous posting
+                </span>
+              </div>
+            </div>
+
+            {/* Tips Section - Collapsible */}
+            <div className="mb-6 border border-blue-100 rounded-lg overflow-hidden">
+              <div 
+                className="p-4 bg-blue-50 flex justify-between items-center cursor-pointer"
+                onClick={() => setShowTips(!showTips)}
+              >
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-5 h-5 text-blue-600" />
+                  <h3 className="font-medium text-blue-700">Important Tips for Posting Your Case</h3>
+                </div>
+                <button className="text-blue-700">
+                  {showTips ? "Hide" : "Show"}
+                </button>
+              </div>
+              
+              {showTips && (
+                <div className="p-4 bg-white border-t border-blue-100">
+                  <ul className="space-y-2 text-sm text-slate-700">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Be specific</strong> about your legal issue without revealing personal identifiers</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Include relevant dates</strong> such as incident dates, filing deadlines, or hearing dates</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Clearly state your objectives</strong> (compensation, defense, advice, representation)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <AlertCircle className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                      <span><strong>Avoid including</strong> full names, addresses, ID numbers, or contact information</span>
+                    </li>
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            {/* Alert messages */}
             {error && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mb-6 p-4 bg-red-100 text-red-700 rounded-xl flex items-center justify-center gap-2 shadow-sm"
+                className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg flex items-center gap-2 border border-red-100"
               >
-                <AlertCircle className="w-6 h-6" />
-                {error}
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm">{error}</span>
               </motion.div>
             )}
 
@@ -160,81 +313,108 @@ function PostCaseForm() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="mb-6 p-4 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center gap-2 shadow-sm"
+                className="mb-6 p-4 bg-blue-50 text-blue-700 rounded-lg flex items-center justify-center gap-2 border border-blue-100"
               >
-                <Clock className="w-6 h-6 animate-spin" />
-                Submitting your case...
+                <Clock className="w-5 h-5 animate-spin" />
+                <span className="text-sm">Submitting your case...</span>
               </motion.div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <label className="block text-lg font-semibold text-indigo-600 mb-2 flex items-center gap-2">
-                  <FileText className="w-6 h-6" /> Subject
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-blue-600" /> 
+                    Case Subject
+                  </span>
                 </label>
                 <input
                   type="text"
                   name="subject"
                   value={formData.subject}
                   onChange={handleChange}
-                  placeholder="e.g., Property Dispute"
-                  className="w-full p-4 border border-indigo-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 shadow-sm text-gray-800 placeholder-gray-500 text-lg"
-                  disabled={loading}
+                  placeholder="e.g., Property Boundary Dispute"
+                  className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400 text-sm"
+                  disabled={loading || pendingCasesCount >= 3}
                   required
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-lg font-semibold text-indigo-600 mb-2 flex items-center gap-2">
-                    <Briefcase className="w-6 h-6" /> Case Type
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <span className="flex items-center gap-2">
+                      <Briefcase className="w-4 h-4 text-blue-600" /> 
+                      Case Type
+                    </span>
                   </label>
                   <select
                     name="caseType"
                     value={formData.caseType}
                     onChange={handleChange}
-                    className="w-full p-4 border border-indigo-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 shadow-sm text-gray-800 text-lg"
-                    disabled={loading}
+                    className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-800 text-sm"
+                    disabled={loading || pendingCasesCount >= 3}
                     required
                   >
                     <option value="">Select case type</option>
-                    <option value="criminal">Criminal</option>
-                    <option value="civil">Civil</option>
-                    <option value="family">Family</option>
+                    
+                    {Object.entries(caseTypes).map(([category, types]) => (
+                      <optgroup key={category} label={category}>
+                        {types.map((type) => (
+                          <option key={type} value={type.toLowerCase().replace(/\s+/g, '-')}>
+                            {type}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-lg font-semibold text-indigo-600 mb-2 flex items-center gap-2">
-                    <MapPin className="w-6 h-6" /> District
+                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                    <span className="flex items-center gap-2">
+                      <MapPin className="w-4 h-4 text-blue-600" /> 
+                      District
+                    </span>
                   </label>
                   <select
                     name="district"
                     value={formData.district}
                     onChange={handleChange}
-                    className="w-full p-4 border border-indigo-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 shadow-sm text-gray-800 text-lg"
-                    disabled={loading}
+                    className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-800 text-sm"
+                    disabled={loading || pendingCasesCount >= 3}
                     required
                   >
                     <option value="">Select district</option>
-                    <option value="colombo">Colombo</option>
-                    <option value="gampaha">Gampaha</option>
-                    <option value="kandy">Kandy</option>
+                    
+                    {Object.entries(districts).map(([province, provinceDistricts]) => (
+                      <optgroup key={province} label={province}>
+                        {provinceDistricts.map((district) => (
+                          <option key={district} value={district.toLowerCase()}>
+                            {district}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-lg font-semibold text-indigo-600 mb-2 flex items-center gap-2">
-                  <Calendar className="w-6 h-6" /> Court Date <span className="text-sm text-gray-500">(Optional)</span>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <span className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-blue-600" /> 
+                    Court Date <span className="text-xs text-slate-500 font-normal">(Optional)</span>
+                  </span>
                 </label>
                 <input
                   type="date"
                   name="courtDate"
                   value={formData.courtDate}
                   onChange={handleChange}
-                  className="w-full p-4 border border-indigo-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 shadow-sm text-gray-800 disabled:bg-gray-200"
-                  disabled={loading || noCourtDate}
+                  className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-800 disabled:bg-slate-100 disabled:text-slate-400 text-sm"
+                  disabled={loading || noCourtDate || pendingCasesCount >= 3}
+                  min={new Date().toISOString().split('T')[0]}
                 />
                 <div className="mt-2 flex items-center gap-2">
                   <input
@@ -242,66 +422,102 @@ function PostCaseForm() {
                     id="noCourtDate"
                     checked={noCourtDate}
                     onChange={(e) => setNoCourtDate(e.target.checked)}
-                    className="w-5 h-5 text-indigo-600 border-indigo-200 rounded focus:ring-indigo-400"
-                    disabled={loading}
+                    className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    disabled={loading || pendingCasesCount >= 3}
                   />
-                  <label htmlFor="noCourtDate" className="text-sm text-gray-700 font-medium">
+                  <label htmlFor="noCourtDate" className="text-xs text-slate-600">
                     No court date scheduled yet
                   </label>
                 </div>
               </div>
 
               <div>
-                <label className="block text-lg font-semibold text-indigo-600 mb-2 flex items-center gap-2">
-                  <AlertCircle className="w-6 h-6" /> Description
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4 text-blue-600" /> 
+                    Case Description
+                  </span>
                 </label>
                 <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
-                  placeholder="Provide a general description (no personal details)"
-                  className="w-full p-4 border border-indigo-200 rounded-xl bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-indigo-400 transition-all duration-300 shadow-sm text-gray-800 placeholder-gray-500 resize-none h-36 text-lg"
-                  disabled={loading}
+                  placeholder="Provide details of your case without including sensitive personal information..."
+                  className="w-full p-3 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-800 placeholder-slate-400 resize-none h-32 text-sm"
+                  disabled={loading || pendingCasesCount >= 3}
                   required
                 />
+                
+                {/* Enhanced Description Tips */}
+                <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded text-xs text-slate-600">
+                  <p className="font-medium text-slate-700 mb-1">Suggested information to include:</p>
+                  <ul className="space-y-1">
+                    <li>• Key dates related to your case (incidents, filings, deadlines)</li>
+                    <li>• Legal questions or concerns you have</li>
+                    <li>• Your objectives and desired outcomes</li>
+                    <li>• Relevant background information without personal identifiers</li>
+                  </ul>
+                </div>
               </div>
 
-              <div className="flex items-center justify-center gap-2">
-                <input
-                  type="checkbox"
-                  id="agree"
-                  checked={agreed}
-                  onChange={(e) => setAgreed(e.target.checked)}
-                  className="w-6 h-6 text-indigo-600 border-indigo-200 rounded focus:ring-indigo-400"
-                  disabled={loading}
-                />
-                <label htmlFor="agree" className="text-base text-gray-700 font-medium tracking-wide">
-                  I agree to post this case anonymously and confirm it contains no sensitive information.
-                </label>
+              {/* Anonymity Agreement - Enhanced */}
+              <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-start gap-3 mb-3">
+                  <input
+                    type="checkbox"
+                    id="agree"
+                    checked={agreed}
+                    onChange={(e) => setAgreed(e.target.checked)}
+                    className="w-4 h-4 mt-0.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+                    disabled={loading || pendingCasesCount >= 3}
+                  />
+                  <div>
+                    <label htmlFor="agree" className="text-sm font-medium text-blue-700">
+                      Anonymous Posting Agreement
+                    </label>
+                    <p className="text-xs text-blue-600 mt-1">
+                      I confirm this post contains no sensitive personal information that could identify me or other parties involved.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-4 pt-4 border-t border-blue-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Shield className="w-4 h-4 text-blue-600" />
+                    <h4 className="text-sm font-medium text-blue-700">Your Privacy Protection</h4>
+                  </div>
+                  <ul className="space-y-2">
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-blue-600">Your identity remains anonymous until you choose to reveal it to a specific attorney</p>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-blue-600">Your case will be visible to qualified attorneys for 14 days</p>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs text-blue-600">You have full control over which attorney you select to handle your case</p>
+                    </li>
+                  </ul>
+                </div>
               </div>
 
-              <div className="text-center text-base text-gray-600 tracking-wide">
-                <CheckCircle className="w-5 h-5 inline-block mr-2 text-indigo-500" />
-                Note: Cases expire after 14 days if no lawyer expresses interest.
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                className="flex justify-center"
-              >
+              <div className="pt-4">
                 <button
                   type="submit"
-                  className={`flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white rounded-full hover:from-indigo-700 hover:to-blue-700 transition-all duration-300 shadow-lg text-lg font-semibold w-full max-w-md ${
+                  className={`flex items-center justify-center gap-2 w-full p-3.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-4 focus:ring-blue-200 transition-all text-sm font-medium shadow-sm ${
                     loading || !agreed || pendingCasesCount >= 3 ? "opacity-50 cursor-not-allowed" : ""
                   }`}
                   disabled={loading || !agreed || pendingCasesCount >= 3}
                 >
-                  <Send className="w-6 h-6 animate-[wiggle_1s_infinite]" />
-                  {loading ? "Submitting..." : "Post Case"}
+                  <Send className="w-4 h-4" />
+                  {loading ? "Submitting..." : pendingCasesCount >= 3 ? "Case Limit Reached" : "Post Case Anonymously"}
                 </button>
-              </motion.div>
+                <p className="mt-2.5 text-center text-xs text-slate-500">
+                  By posting, you agree to our <span className="text-blue-600 cursor-pointer">Terms of Service</span> and <span className="text-blue-600 cursor-pointer">Privacy Policy</span>
+                </p>
+              </div>
             </form>
           </motion.div>
         </main>
